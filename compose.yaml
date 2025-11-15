@@ -1,0 +1,9 @@
+services:
+  php-qa:
+    build:
+      context: .
+      dockerfile: .docker/qa/Dockerfile
+    volumes:
+      - ./:/app
+      - ~/.composer:/usr/local/share/composer # share composer cache
+    tty: true
