@@ -7,7 +7,6 @@ use Rector\CodeQuality\Rector\If_\ShortenElseIfRector;
 use Rector\CodingStyle\Rector\String_\UseClassKeywordForClassNameResolutionRector;
 use Rector\Config\RectorConfig;
 use Rector\Php80\Rector\Class_\StringableForToStringRector;
-// use Rector\Symfony\CodeQuality\Rector\Class_\InlineClassRoutePrefixRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -15,7 +14,7 @@ return RectorConfig::configure()
         __DIR__ . '/src',
     ])
 
-    ->withPhpSets(php83: true)
+    ->withPhpSets()
 
     ->withPreparedSets(
         deadCode: true,
@@ -24,11 +23,9 @@ return RectorConfig::configure()
         instanceOf: true,
         typeDeclarations: true,
         privatization: true,
-        strictBooleans: true,
     )
 
     ->withSkip([
-        // InlineClassRoutePrefixRector::class,
         SimplifyRegexPatternRector::class,
         ShortenElseIfRector::class,
         StringableForToStringRector::class,
