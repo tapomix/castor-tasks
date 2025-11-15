@@ -1,0 +1,7 @@
+parameters:
+  paths:
+    - src/
+  level: 8 # max
+  # scanFiles:
+  #   - .castor/.castor.stub.php
+  editorUrl: 'vscode://file/%%file%%:%%line%%'
