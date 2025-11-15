@@ -11,6 +11,7 @@ use Rector\Php80\Rector\Class_\StringableForToStringRector;
 
 return RectorConfig::configure()
     ->withPaths([
+        __DIR__ . '/.castor',
         __DIR__ . '/src',
     ])
 

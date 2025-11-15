@@ -1,7 +1,8 @@
 parameters:
   paths:
+    - .castor/
     - src/
   level: 8 # max
   # scanFiles:
-  #   - .castor/.castor.stub.php
+  #   - .castor/.castor.stub.php # useless if jolicode/castor package is installed
   editorUrl: 'vscode://file/%%file%%:%%line%%'

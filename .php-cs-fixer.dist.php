@@ -4,7 +4,10 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $finder = (new Finder())
-    ->in(__DIR__ . '/src')
+    ->in([
+        __DIR__ . '/.castor',
+        __DIR__ . '/src',
+    ])
 ;
 
 return (new Config())
