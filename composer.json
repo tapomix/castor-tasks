@@ -19,6 +19,11 @@
         "jolicode/castor": "^1.0",
         "rector/rector": "^2.2"
     },
+    "autoload": {
+        "files": [
+            "src/context.php"
+        ]
+    },
     "config": {
         "sort-packages": true
     }
