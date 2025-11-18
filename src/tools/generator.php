@@ -30,7 +30,7 @@ function password(int $length = 16): void
     $password .= $special[\random_int(0, \count($special) - 1)];
 
     // fill the rest randomly using random_bytes for more entropy
-    for ($i = 4; $i < $length; $i++) {
+    for ($i = 4; $i < $length; ++$i) {
         $randomIndex = \ord(\random_bytes(1)) % $allLength;
         $password .= $allCharacters[$randomIndex];
     }
