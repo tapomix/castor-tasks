@@ -18,11 +18,12 @@ define('EXPR_FRAMEWORK_LARAVEL', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
 {
-    if ( // constant defined in castor.php from app
-        \defined('TAPOMIX_APP_ENV_FILE')
-        && fs()->exists(TAPOMIX_APP_ENV_FILE)
-    ) {
-        // load app env first to enable variable expansion
+    if (!defined('TAPOMIX_APP_ENV_FILE')) { // constant may be defined in castor.php from app
+        define('TAPOMIX_APP_ENV_FILE', '.env.docker');
+    }
+
+    // load app env first to enable variable interpolation
+    if (fs()->exists(TAPOMIX_APP_ENV_FILE)) {
         load_dot_env(TAPOMIX_APP_ENV_FILE);
     }
 
@@ -37,7 +38,7 @@ function default_context(): Context
 
         'CASTOR.DEFAULT_BROWSER' => $_SERVER['CASTOR_DEFAULT_BROWSER'] ?? 'firefox-developer-edition',
 
-        'DOCKER.ENV_FILE' => \defined('TAPOMIX_APP_ENV_FILE') ? TAPOMIX_APP_ENV_FILE : '.env.docker',
+        'DOCKER.ENV_FILE' => TAPOMIX_APP_ENV_FILE, // ! constant !
         'DOCKER.SERVICES.DB' => $_SERVER['APP_SERVICE_DB'] ?? 'db',
         'DOCKER.SERVICES.NODE' => $_SERVER['APP_SERVICE_NODE'] ?? 'node',
         'DOCKER.SERVICES.PHP' => $_SERVER['APP_SERVICE_PHP'] ?? 'php',
