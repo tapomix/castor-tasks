@@ -9,7 +9,7 @@ use Symfony\Component\Process\Process;
 use function Castor\fs;
 use function Castor\load_dot_env;
 
-define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix_default');
+define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
