@@ -19,7 +19,7 @@ function analyze(array $cmd): Process
     return docker_exec((string) variable('DOCKER.SERVICES.PHP'), $cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Lint Twig templates', aliases: ['lint'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Lint Twig templates', aliases: ['lint'], enabled: EXPR_FRAMEWORK_SYMFONY)]
 function lint(): ?Process
 {
     if (!fs()->exists(buildLocalPath('vendor/symfony/twig-bundle'))) {
@@ -72,7 +72,7 @@ function phpstan(): ?Process
     return analyze([$binary, 'analyse', '--memory-limit', '256M']);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Pint', aliases: ['pint'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Pint', aliases: ['pint'], enabled: EXPR_FRAMEWORK_LARAVEL)]
 function pint(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,
@@ -118,7 +118,7 @@ function rector(
     return analyze($cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Twig-CS-Fixer', aliases: ['twig-cs'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Twig-CS-Fixer', aliases: ['twig-cs'], enabled: EXPR_FRAMEWORK_SYMFONY)]
 function twigCsFixer(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,

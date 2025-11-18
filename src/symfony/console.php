@@ -10,7 +10,7 @@ use function Castor\variable;
 use function tapomix\castor\docker\exec as docker_exec;
 
 /** @param string[] $args */
-#[AsTask(namespace: 'tapomix-symfony', description: 'Execute a Symfony Console command', aliases: ['console'])]
+#[AsTask(namespace: 'tapomix-symfony', description: 'Execute a Symfony Console command', aliases: ['console'], enabled: EXPR_FRAMEWORK_SYMFONY)]
 function console(
     #[AsRawTokens]
     array $args = [],

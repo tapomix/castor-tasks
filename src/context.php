@@ -12,6 +12,9 @@ use function Castor\load_dot_env;
 define('TAPOMIX_CASTOR_ENV_FILE', '.castor/.env.castor');
 define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 
+define('EXPR_FRAMEWORK_SYMFONY', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.FRAMEWORK'] === 'symfony'");
+define('EXPR_FRAMEWORK_LARAVEL', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.FRAMEWORK'] === 'laravel'");
+
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
 {

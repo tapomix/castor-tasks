@@ -10,7 +10,7 @@ use function Castor\variable;
 use function tapomix\castor\docker\exec as docker_exec;
 
 /** @param string[] $args */
-#[AsTask(namespace: 'tapomix-laravel', description: 'Execute a Laravel Artisan command', aliases: ['artisan'])]
+#[AsTask(namespace: 'tapomix-laravel', description: 'Execute a Laravel Artisan command', aliases: ['artisan'], enabled: EXPR_FRAMEWORK_LARAVEL)]
 function artisan(
     #[AsRawTokens]
     array $args = [],
