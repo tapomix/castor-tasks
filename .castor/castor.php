@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\dev;
+namespace Tapomix\Dev;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
@@ -9,7 +9,9 @@ use function Castor\context;
 use function Castor\io;
 use function Castor\run;
 
-#[AsTask(description: 'Run QA tools', default: true, aliases: ['qa'])]
+define('TAPOMIX_NAMESPACE_DEV', 'tapomix-dev');
+
+#[AsTask(namespace: TAPOMIX_NAMESPACE_DEV, description: 'Run QA tools', default: true, aliases: ['qa'])]
 function qa(): void
 {
     io()->info('Run QA tools');
@@ -18,7 +20,7 @@ function qa(): void
 }
 
 /** @param string[] $args */
-#[AsTask(description: 'Execute a composer command', aliases: ['composer'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_DEV, description: 'Execute a composer command', aliases: ['composer'])]
 function composer(
     #[AsRawTokens]
     array $args = [],
