@@ -11,8 +11,8 @@ use function Castor\variable;
 #[AsTask(namespace: 'tapomix-tools', description: 'Open app in browser', aliases: ['browser', 'open'])]
 function browser(?string $browser = null): void
 {
-    $browser ??= (string) variable('TAPOMIX.DEFAULT_BROWSER');
-    $serverName = (string) variable('APP.SERVER_NAME', 'localhost');
+    $browser ??= (string) variable('CASTOR.DEFAULT_BROWSER');
+    $serverName = (string) variable('APP.SERVER_NAME');
 
     // test if browser executable exist
     $finder = new ExecutableFinder();

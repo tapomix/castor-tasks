@@ -16,7 +16,7 @@ function exec(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    docker_exec((string) variable('TAPOMIX.SERVICES.PHP'), \array_merge(['composer'], $args));
+    docker_exec((string) variable('DOCKER.SERVICES.PHP'), \array_merge(['composer'], $args));
 }
 
 /** @param string[] $args */

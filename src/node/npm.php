@@ -15,5 +15,5 @@ function npm(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    docker_exec((string) variable('TAPOMIX.SERVICES.NODE'), \array_merge(['npm'], $args));
+    docker_exec((string) variable('DOCKER.SERVICES.NODE'), \array_merge(['npm'], $args));
 }

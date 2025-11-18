@@ -67,8 +67,8 @@ function shell(string $service): void
 /** @return string[] */
 function buildBaseDockerComposeCmd(): array
 {
-    $dockerEnvFile = (string) variable('APP.DOCKER.ENV_FILE', '.env.docker');
-    $appEnvironment = (string) variable('APP.ENVIRONMENT', 'dev');
+    $dockerEnvFile = (string) variable('DOCKER.ENV_FILE');
+    $appEnvironment = (string) variable('APP.ENVIRONMENT');
 
     $envCompose = 'compose.' . $appEnvironment . '.yaml';
 

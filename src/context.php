@@ -29,11 +29,20 @@ function default_context(): Context
     }
 
     $data = [
-        'TAPOMIX.DEFAULT_BROWSER' => $_SERVER['TAPOMIX_DEFAULT_BROWSER'] ?? 'firefox-developer-edition',
+        // from castor specific env vars
+        'APP.CODE_PATH' => $_SERVER['APP_CODE_PATH'] ?? 'code',
+        'APP.FRAMEWORK' => $_SERVER['APP_FRAMEWORK'] ?? 'vanilla',
 
-        'TAPOMIX.SERVICES.DB' => $_SERVER['TAPOMIX_SERVICE_DB'] ?? 'db',
-        'TAPOMIX.SERVICES.NODE' => $_SERVER['TAPOMIX_SERVICE_NODE'] ?? 'node',
-        'TAPOMIX.SERVICES.PHP' => $_SERVER['TAPOMIX_SERVICE_PHP'] ?? 'php',
+        'CASTOR.DEFAULT_BROWSER' => $_SERVER['CASTOR_DEFAULT_BROWSER'] ?? 'firefox-developer-edition',
+
+        'DOCKER.ENV_FILE' => \defined('TAPOMIX_APP_ENV_FILE') ? TAPOMIX_APP_ENV_FILE : '.env.docker',
+        'DOCKER.SERVICES.DB' => $_SERVER['APP_SERVICE_DB'] ?? 'db',
+        'DOCKER.SERVICES.NODE' => $_SERVER['APP_SERVICE_NODE'] ?? 'node',
+        'DOCKER.SERVICES.PHP' => $_SERVER['APP_SERVICE_PHP'] ?? 'php',
+
+        // from app specific env vars
+        'APP.ENVIRONMENT' => $_SERVER['APP_ENVIRONMENT'] ?? 'dev',
+        'APP.SERVER_NAME' => $_SERVER['APP_SERVER_NAME'] ?? 'localhost',
     ];
 
     return new Context(

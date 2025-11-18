@@ -15,5 +15,5 @@ function console(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    docker_exec((string) variable('TAPOMIX.SERVICES.PHP'), \array_merge(['php', 'bin/console'], $args));
+    docker_exec((string) variable('DOCKER.SERVICES.PHP'), \array_merge(['php', 'bin/console'], $args));
 }
