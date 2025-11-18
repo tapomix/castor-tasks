@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor\qa\analyzer;
+namespace Tapomix\Castor\Qa\Analyzer;
 
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
@@ -10,8 +10,8 @@ use Symfony\Component\Process\Process;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\variable;
-use function tapomix\castor\docker\exec as docker_exec;
-use function tapomix\castor\qa\buildLocalPath;
+use function Tapomix\Castor\Docker\exec as docker_exec;
+use function Tapomix\Castor\Qa\buildLocalPath;
 
 /** @param string[] $cmd */
 function analyze(array $cmd): Process

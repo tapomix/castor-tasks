@@ -1,12 +1,12 @@
 <?php
 
-namespace tapomix\castor\laravel;
+namespace Tapomix\Castor\Laravel;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
 use function Castor\variable;
-use function tapomix\castor\docker\exec as docker_exec;
+use function Tapomix\Castor\Docker\exec as docker_exec;
 
 /** @param string[] $args */
 #[AsTask(namespace: 'tapomix-laravel', description: 'Execute a Laravel Artisan command', aliases: ['artisan'], enabled: EXPR_FRAMEWORK_LARAVEL)]

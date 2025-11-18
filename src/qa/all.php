@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor\qa;
+namespace Tapomix\Castor\Qa;
 
 use Castor\Attribute\AsTask;
 use Castor\Helper\PathHelper;
@@ -54,7 +54,7 @@ function all(bool $parallel = false): int
 }
 
 /** @return callable-string[] */
-function listTools(string $namespace = 'tapomix\castor\qa\analyzer'): array
+function listTools(string $namespace = 'Tapomix\Castor\Qa\Analyzer'): array
 {
     $functions = \get_defined_functions()['user'];
 

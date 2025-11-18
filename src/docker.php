@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor\docker;
+namespace Tapomix\Castor\Docker;
 
 use Castor\Attribute\AsTask;
 use Castor\Console\Output\VerbosityLevel;

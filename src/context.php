@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor;
+namespace Tapomix\Castor;
 
 use Castor\Attribute\AsContext;
 use Castor\Context;

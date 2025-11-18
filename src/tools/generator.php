@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor\tools;
+namespace Tapomix\Castor\Tools;
 
 use Castor\Attribute\AsTask;
 

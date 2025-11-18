@@ -1,12 +1,12 @@
 <?php
 
-namespace tapomix\castor\composer;
+namespace Tapomix\Castor\Composer;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
 use function Castor\variable;
-use function tapomix\castor\docker\exec as docker_exec;
+use function Tapomix\Castor\Docker\exec as docker_exec;
 
 define('TAPOMIX_NAMESPACE_COMPOSER', 'tapomix-composer');
 

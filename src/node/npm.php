@@ -1,12 +1,12 @@
 <?php
 
-namespace tapomix\castor\node;
+namespace Tapomix\Castor\Node;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
 use function Castor\variable;
-use function tapomix\castor\docker\exec as docker_exec;
+use function Tapomix\Castor\Docker\exec as docker_exec;
 
 /** @param string[] $args */
 #[AsTask(namespace: 'tapomix-node', description: 'Execute Npm command', aliases: ['npm'])]

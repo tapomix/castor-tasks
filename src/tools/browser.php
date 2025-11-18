@@ -1,6 +1,6 @@
 <?php
 
-namespace tapomix\castor\tools;
+namespace Tapomix\Castor\Tools;
 
 use Castor\Attribute\AsTask;
 use Symfony\Component\Process\ExecutableFinder;
@@ -8,7 +8,7 @@ use Symfony\Component\Process\ExecutableFinder;
 use function Castor\capture;
 use function Castor\variable;
 
-#[AsTask(namespace: 'tapomix-tools', description: 'Open app in browser', aliases: ['browser', 'open'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Open app in browser', aliases: ['browser', 'open'])]
 function browser(?string $browser = null): void
 {
     $browser ??= (string) variable('CASTOR.DEFAULT_BROWSER');

@@ -1,12 +1,12 @@
 <?php
 
-namespace tapomix\castor\symfony;
+namespace Tapomix\Castor\Symfony;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
 use function Castor\variable;
-use function tapomix\castor\docker\exec as docker_exec;
+use function Tapomix\Castor\Docker\exec as docker_exec;
 
 /** @param string[] $args */
 #[AsTask(namespace: 'tapomix-symfony', description: 'Execute a Symfony Console command', aliases: ['console'], enabled: EXPR_FRAMEWORK_SYMFONY)]
