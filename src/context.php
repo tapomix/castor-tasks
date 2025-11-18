@@ -43,7 +43,10 @@ function default_context(): Context
         'DOCKER.SERVICES.PHP' => $_SERVER['APP_SERVICE_PHP'] ?? 'php',
 
         // from app specific env vars
+        'APP.DB.NAME' => $_SERVER['APP_DB_NAME'] ?? 'db',
+        'APP.DB.USER' => $_SERVER['APP_DB_USER'] ?? 'user',
         'APP.ENVIRONMENT' => $_SERVER['APP_ENVIRONMENT'] ?? 'dev',
+        'APP.NAME' => $_SERVER['APP_NAME'] ?? 'app',
         'APP.SERVER_NAME' => $_SERVER['APP_SERVER_NAME'] ?? 'localhost',
     ];
 
