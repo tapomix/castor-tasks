@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 use function Castor\fs;
 use function Castor\load_dot_env;
 
+define('TAPOMIX_CASTOR_ENV_FILE', '.castor/.env.castor');
 define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
@@ -22,10 +23,8 @@ function default_context(): Context
         load_dot_env(TAPOMIX_APP_ENV_FILE);
     }
 
-    $castorEnvFile = '.castor/.env.castor';
-
-    if (fs()->exists($castorEnvFile)) {
-        load_dot_env($castorEnvFile);
+    if (fs()->exists(TAPOMIX_CASTOR_ENV_FILE)) {
+        load_dot_env(TAPOMIX_CASTOR_ENV_FILE);
     }
 
     $data = [
