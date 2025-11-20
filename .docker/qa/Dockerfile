@@ -4,7 +4,10 @@ ARG USER=app
 ARG UID=1000
 ARG GID=${UID}
 
-RUN apk add --no-cache git unzip bash
+RUN apk add --no-cache git unzip bash $PHPIZE_DEPS \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
+    && apk del $PHPIZE_DEPS
 
 RUN addgroup -g ${GID} ${USER} \
     && adduser -D -u ${UID} -G ${USER} ${USER} \
