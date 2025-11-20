@@ -54,13 +54,13 @@ function password(int $length = 16): void
 /**
  * Generate a random hexadecimal token
  *
- * @param int $length Desired length (minimum 1)
+ * @param int $length Desired length (minimum 4)
  *
  * @return string Generated token
  */
 function generateToken(int $length = 32): string
 {
-    return \bin2hex(\random_bytes(\max(1, $length)));
+    return \bin2hex(\random_bytes(\max(4, $length)));
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random token', aliases: ['token'])]
