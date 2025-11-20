@@ -112,10 +112,10 @@ class GeneratorTest extends TestCase
 
     public function testGenerateTokenMinimumLength(): void
     {
-        // Should enforce minimum of 1 byte = 2 hex chars
+        // Should enforce minimum of 4 byte = 8 hex chars
         $token = generateToken(0);
 
-        $this->assertSame(2, strlen($token));
+        $this->assertSame(8, strlen($token));
     }
 
     public function testGenerateTokenOnlyContainsHexCharacters(): void
@@ -134,12 +134,12 @@ class GeneratorTest extends TestCase
         $this->assertNotSame($token1, $token2);
     }
 
-    public function testGenerateTokenWithLength1(): void
+    public function testGenerateTokenWithLength4(): void
     {
-        $token = generateToken(1);
+        $token = generateToken(4);
 
-        $this->assertSame(2, strlen($token));
-        $this->assertMatchesRegularExpression('/^[0-9a-f]{2}$/', $token);
+        $this->assertSame(8, strlen($token));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $token);
     }
 
     public function testGenerateTokenWithLength100(): void

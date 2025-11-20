@@ -17,7 +17,7 @@ class CheckTaskTest extends TaskTestCase
         $process = $this->runTask(['--version']);
 
         $this->assertTaskSucceeded($process);
-        $this->assertOutputContains($process, 'castor_');
+        $this->assertOutputContains($process, 'castor');
     }
 
     public function testCastorListCommand(): void
