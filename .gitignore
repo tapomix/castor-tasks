@@ -1,0 +1,19 @@
+# Castor
+.castor.stub.php
+
+/vendor/
+
+/.php-cs-fixer.cache
+
+# PHPUnit
+/.phpunit.cache
+/.phpunit.result.cache
+/phpunit.xml
+
+.env
+
+# Claude
+.claude/
+/CLAUDE.md
+
+/TODO.md
