@@ -8,7 +8,6 @@ use Castor\Attribute\AsTask;
 use Castor\Context;
 use Symfony\Component\Process\Process;
 
-use function Castor\context;
 use function Castor\io;
 use function Castor\run;
 
@@ -18,8 +17,8 @@ define('TAPOMIX_NAMESPACE_DEV', 'tapomix-dev');
 function default_context(): Context
 {
     return new Context(
-        allowFailure: true,
         tty: Process::isTtySupported(),
+        allowFailure: true,
     );
 }
 
