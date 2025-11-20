@@ -8,8 +8,14 @@ use function Castor\io;
 
 define('TAPOMIX_NAMESPACE_TOOLS', 'tapomix-tools');
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random password', aliases: ['password'])]
-function password(int $length = 16): void
+/**
+ * Generate a random secure password
+ *
+ * @param int $length Desired length (minimum 12)
+ *
+ * @return string Generated password
+ */
+function generatePassword(int $length = 16): string
 {
     $lowercase = \range('a', 'z');
     $uppercase = \range('A', 'Z');
@@ -35,15 +41,31 @@ function password(int $length = 16): void
         $password .= $allCharacters[$randomIndex];
     }
 
-    $password = \str_shuffle($password);
+    return \str_shuffle($password);
+}
 
+#[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random password', aliases: ['password'])]
+function password(int $length = 16): void
+{
+    $password = generatePassword($length);
     io()->text('Copy+Paste your new password : ' . $password);
+}
+
+/**
+ * Generate a random hexadecimal token
+ *
+ * @param int $length Desired length (minimum 1)
+ *
+ * @return string Generated token
+ */
+function generateToken(int $length = 32): string
+{
+    return \bin2hex(\random_bytes(\max(1, $length)));
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random token', aliases: ['token'])]
 function token(int $length = 32): void
 {
-    $token = \bin2hex(\random_bytes(\max(1, $length)));
-
+    $token = generateToken($length);
     io()->text('Copy+Paste your new token : ' . $token);
 }
