@@ -4,11 +4,14 @@ namespace Tapomix\Castor\Qa;
 
 use Castor\Attribute\AsTask;
 use Castor\Helper\PathHelper;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Process\Process;
 
+use function Castor\app;
 use function Castor\context;
 use function Castor\io;
 use function Castor\parallel;
+use function Castor\run;
 use function Castor\variable;
 
 define('TAPOMIX_NAMESPACE_QA', 'tapomix-qa');
@@ -18,9 +21,20 @@ function all(bool $parallel = false): int
 {
     io()->title('Running all analyzers ');
 
-    $tools = listTools();
+    $analyzers = listAnalyzers();
 
-    if ([] === $tools) {
+    /** @var string[] $taskNames */
+    $taskNames = \array_values( // keep only values
+        \array_filter( // skip command with null name
+            \array_map( // extract command name
+                fn (Command $cmd): ?string => $cmd->getName(),
+                $analyzers,
+            ),
+            fn (?string $name): bool => null !== $name,
+        )
+    );
+
+    if ([] === $taskNames) {
         io()->warning('No QA analyzer found');
 
         return 0;
@@ -31,13 +45,13 @@ function all(bool $parallel = false): int
     if ($parallel) {
         $processes = parallel(
             ...\array_map(
-                fn (string $fn): \Closure => (fn (): ?Process => $fn()),
-                $tools
+                fn (string $taskName): \Closure => fn (): Process => runCastorCommand($taskName),
+                $taskNames
             )
         );
     } else {
-        foreach ($tools as $fn) {
-            $processes[] = $fn();
+        foreach ($taskNames as $taskName) {
+            $processes[] = runCastorCommand($taskName);
         }
     }
 
@@ -47,18 +61,23 @@ function all(bool $parallel = false): int
 
     return \max(
         \array_map(
-            fn (?Process $process): int => $process?->getExitCode() ?? 0,
+            fn (Process $process): int => $process->getExitCode() ?? 0,
             $processes
         )
     );
 }
 
-/** @return callable-string[] */
-function listTools(string $namespace = 'Tapomix\Castor\Qa\Analyzer'): array
+function runCastorCommand(string $command): Process
 {
-    $functions = \get_defined_functions()['user'];
+    return run(['castor', $command]);
+}
 
-    return \array_filter($functions, fn (string $fn): bool => \str_starts_with($fn, $namespace . '\\'));
+/** @return Command[] */
+function listAnalyzers(string $namespace = TAPOMIX_NAMESPACE_QA): array
+{
+    $tasks = app()->all($namespace);
+
+    return \array_filter($tasks, fn (Command $cmd): bool => $namespace . ':all' !== $cmd->getName());
 }
 
 function buildLocalPath(string $binary): string
