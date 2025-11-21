@@ -19,7 +19,7 @@ function analyze(array $cmd): Process
     return docker_exec((string) variable('DOCKER.SERVICES.PHP'), $cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Lint Twig templates', aliases: ['lint'], enabled: EXPR_FRAMEWORK_SYMFONY)]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Lint Twig templates', aliases: ['lint'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
 function lint(): ?Process
 {
     if (!fs()->exists(buildLocalPath('vendor/symfony/twig-bundle'))) {
@@ -33,7 +33,7 @@ function lint(): ?Process
     return analyze(['php', 'bin/console', 'lint:twig', '--show-deprecations', 'templates/']);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run PHP-CS-Fixer', aliases: ['php-cs', 'cs'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run PHP-CS-Fixer', aliases: ['php-cs', 'cs'], enabled: EXPR_ENV_DEV)]
 function phpCsFixer(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,
@@ -56,7 +56,7 @@ function phpCsFixer(
     return analyze($cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run PHPStan', aliases: ['phpstan'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run PHPStan', aliases: ['phpstan'], enabled: EXPR_ENV_DEV)]
 function phpstan(): ?Process
 {
     $binary = 'vendor/bin/phpstan';
@@ -72,7 +72,7 @@ function phpstan(): ?Process
     return analyze([$binary, 'analyse', '--memory-limit', '256M']);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Pint', aliases: ['pint'], enabled: EXPR_FRAMEWORK_LARAVEL)]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Pint', aliases: ['pint'], enabled: EXPR_FRAMEWORK_LARAVEL . ' && ' . EXPR_ENV_DEV)]
 function pint(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,
@@ -95,7 +95,7 @@ function pint(
     return analyze($cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Rector', aliases: ['rector'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Rector', aliases: ['rector'], enabled: EXPR_ENV_DEV)]
 function rector(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,
@@ -118,7 +118,7 @@ function rector(
     return analyze($cmd);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Twig-CS-Fixer', aliases: ['twig-cs'], enabled: EXPR_FRAMEWORK_SYMFONY)]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Twig-CS-Fixer', aliases: ['twig-cs'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
 function twigCsFixer(
     #[AsOption(shortcut: 'f', description: 'Really fix issues', mode: InputOption::VALUE_NEGATABLE)]
     bool $fix = false,

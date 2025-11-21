@@ -16,7 +16,7 @@ use function Castor\variable;
 
 define('TAPOMIX_NAMESPACE_QA', 'tapomix-qa');
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run all QA analyzers', aliases: ['qa'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run all QA analyzers', aliases: ['qa'], enabled: EXPR_ENV_DEV)]
 function all(bool $parallel = false): int
 {
     io()->title('Running all analyzers ');

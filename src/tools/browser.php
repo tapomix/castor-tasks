@@ -8,7 +8,7 @@ use Symfony\Component\Process\ExecutableFinder;
 use function Castor\capture;
 use function Castor\variable;
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Open app in browser', aliases: ['browser', 'open'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Open app in browser', aliases: ['browser', 'open'], enabled: EXPR_ENV_DEV)]
 function browser(?string $browser = null): void
 {
     $browser ??= (string) variable('CASTOR.DEFAULT_BROWSER');

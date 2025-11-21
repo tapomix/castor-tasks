@@ -15,6 +15,9 @@ define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 define('EXPR_FRAMEWORK_SYMFONY', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.FRAMEWORK'] === 'symfony'");
 define('EXPR_FRAMEWORK_LARAVEL', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.FRAMEWORK'] === 'laravel'");
 
+define('EXPR_ENV_DEV', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIRONMENT'] === 'dev'");
+define('EXPR_ENV_PROD', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIRONMENT'] === 'prod'");
+
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
 {
