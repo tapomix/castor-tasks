@@ -59,7 +59,7 @@ castor castor:composer update
 **Copy** the package file to your project's `.castor/` directory:
 
 ```bash
-cp .castor/vendor/tapomix/castor-tasks/src/castor.dist.php .castor/castor.php
+cp .castor/vendor/tapomix/castor-tasks/dist/castor.dist.php .castor/castor.php
 ```
 
 Or you can add this to your existing `castor.php` file:
@@ -99,7 +99,7 @@ project-root/
 **Copy** the environment configuration template from package in `.castor/.env.castor`:
 
 ```bash
-cp .castor/vendor/tapomix/castor-tasks/src/.env.dist.castor .castor/.env.castor
+cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 ```
 
 ### Available Configuration Variables
