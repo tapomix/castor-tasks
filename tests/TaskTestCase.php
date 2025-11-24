@@ -31,10 +31,11 @@ abstract class TaskTestCase extends TestCase
         $process = new Process(
             [self::$castorBin, '--no-ansi', ...$args],
             cwd: $workingDirectory,
-            env: array_merge([
+            env: [
                 'COLUMNS' => 1000,
                 'CASTOR_NO_REMOTE' => '1',
-            ], $env),
+                ...$env,
+            ],
             timeout: 60
         );
 
