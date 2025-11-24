@@ -36,7 +36,7 @@ function composer(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    run(\array_merge(baseContainerCmd(), ['composer'], $args));
+    run([...baseContainerCmd(), 'composer', ...$args]);
 }
 
 /** @param string[] $args */
@@ -47,7 +47,7 @@ function phpunit(
 ): void {
     io()->info('Running PHPUnit tests');
 
-    run(\array_merge(baseContainerCmd(), ['vendor/bin/phpunit'], $args));
+    run([...baseContainerCmd(), 'vendor/bin/phpunit', ...$args]);
 }
 
 /** @return string[] */
