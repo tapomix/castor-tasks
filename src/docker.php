@@ -2,6 +2,7 @@
 
 namespace Tapomix\Castor\Docker;
 
+use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 use Castor\Console\Output\VerbosityLevel;
 use Castor\Context;
@@ -65,9 +66,12 @@ function logs(): void
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Open terminal in a container', aliases: ['sh'])]
-function shell(string $service): void
-{
-    exec($service, ['bash']);
+function shell(
+    string $service,
+    #[AsOption(description: 'Shell to use in the container')]
+    string $shell = 'bash',
+): void {
+    exec($service, [$shell]);
 }
 
 /** @return string[] */
