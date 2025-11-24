@@ -65,7 +65,8 @@ function logs(): void
     castor_run([...buildBaseDockerComposeCmd(), 'logs', '-f']);
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Open terminal in a container', aliases: ['sh'])]
+/** Note: Alias is 'shell' (not 'sh') to avoid confusion since the default shell is 'bash', not 'sh' */
+#[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Open terminal in a container', aliases: ['shell'])]
 function shell(
     string $service,
     #[AsOption(description: 'Shell to use in the container')]
