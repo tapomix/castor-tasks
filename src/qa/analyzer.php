@@ -48,7 +48,7 @@ function phpCsFixer(
 
     $cmd = [$binary, 'fix'];
     if (!$fix) {
-        $cmd = \array_merge($cmd, ['--dry-run', '-vv', '--diff', '--show-progress=dots']);
+        $cmd = [...$cmd, '--dry-run', '-vv', '--diff', '--show-progress=dots'];
     }
 
     io()->title('Running PHP-CS-Fixer' . ($fix ? '' : ' (**dry-run**)'));
@@ -87,7 +87,7 @@ function pint(
 
     $cmd = [$binary, 'app/'];
     if (!$fix) {
-        $cmd = \array_merge($cmd, ['--test', '-v']);
+        $cmd = [...$cmd, '--test', '-v'];
     }
 
     io()->title('Running Pint' . ($fix ? '' : ' (**dry-run**)'));
@@ -110,7 +110,7 @@ function rector(
 
     $cmd = [$binary, 'process'];
     if (!$fix) {
-        $cmd = \array_merge($cmd, ['--dry-run', '--debug']);
+        $cmd = [...$cmd, '--dry-run', '--debug'];
     }
 
     io()->title('Running Rector' . ($fix ? '' : ' (**dry-run**)'));
@@ -133,7 +133,7 @@ function twigCsFixer(
 
     $cmd = [$binary, 'lint', '--debug'];
     if ($fix) {
-        $cmd[] = '--fix';
+        $cmd[] ='--fix';
     }
 
     io()->title('Running Twig-CS-Fixer' . ($fix ? '' : ' (**dry-run**)'));

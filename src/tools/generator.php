@@ -22,7 +22,7 @@ function generatePassword(int $length = 16): string
     $numbers = \range('0', '9');
     $special = \str_split('!@#$%&*-_+=?');
 
-    $allCharacters = \array_merge($lowercase, $uppercase, $numbers, $special);
+    $allCharacters = [...$lowercase, ...$uppercase, ...$numbers, ...$special];
     $allLength = \count($allCharacters);
 
     // ensure minimum length

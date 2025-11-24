@@ -16,7 +16,7 @@ function exec(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    docker_exec((string) variable('DOCKER.SERVICES.PHP'), \array_merge(['composer'], $args));
+    docker_exec((string) variable('DOCKER.SERVICES.PHP'), ['composer', ...$args]);
 }
 
 /** @param string[] $args */
@@ -25,7 +25,8 @@ function execDev(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    exec(\array_merge($args, ['--dev']));
+    $args[] = '--dev';
+    exec($args);
 }
 
 /** @param string[] $args */
@@ -34,5 +35,5 @@ function execGlobal(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    exec(\array_merge(['global'], $args));
+    exec(['global', ...$args]);
 }
