@@ -127,24 +127,28 @@ castor logs
 
 ### `shell` - Open Terminal in Container
 
-Open an interactive bash shell in a running container.
+Open an interactive shell in a running container.
 
 **Aliases:** `tapomix-docker:shell`, `sh`
 
 **Usage:**
 
 ```bash
-castor sh <service>
+castor sh <service> [--shell=<shell>]
 
 # Examples
-castor sh php   # Open shell in PHP service
-castor sh db    # Open shell in database service
-castor sh node  # Open shell in Node service
+castor sh php               # Open bash shell in PHP service (default)
+castor sh db --shell=sh     # Open sh shell in database service
+castor sh node --shell=zsh  # Open zsh shell in Node service
 ```
 
 **Arguments:**
 
 - `<service>` - Name of the service to connect to
+
+**Options:**
+
+- `--shell=<shell>` - Shell to use (default: `bash`). Can be `bash`, `sh`, `zsh`, etc.
 
 ---
 
