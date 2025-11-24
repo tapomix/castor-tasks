@@ -164,7 +164,7 @@ castor build
 castor start
 castor stop
 castor logs
-castor sh <container>
+castor shell <service>
 ```
 
 ### 📦 [Composer Tasks](docs/composer.md) (`tapomix-composer`)
