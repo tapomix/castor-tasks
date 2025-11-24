@@ -177,7 +177,7 @@ use function Castor\run;
 #[AsTask()]
 function my_docker_task(): void
 {
-    $cmd = array_merge(buildBaseDockerComposeCmd(), ['ps']);
+    $cmd = [...buildBaseDockerComposeCmd(), 'cmd', '--args'];
     run($cmd);
 }
 ```
