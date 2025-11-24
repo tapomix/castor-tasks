@@ -133,7 +133,7 @@ function twigCsFixer(
 
     $cmd = [$binary, 'lint', '--debug'];
     if ($fix) {
-        $cmd[] ='--fix';
+        $cmd[] = '--fix';
     }
 
     io()->title('Running Twig-CS-Fixer' . ($fix ? '' : ' (**dry-run**)'));
