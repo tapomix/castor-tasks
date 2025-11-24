@@ -4,6 +4,7 @@ namespace Tapomix\Castor\Composer;
 
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
+use Castor\Exception\ProblemException;
 
 use function Castor\variable;
 use function Tapomix\Castor\Docker\exec as docker_exec;
@@ -25,6 +26,10 @@ function execDev(
     #[AsRawTokens]
     array $args = [],
 ): void {
+    if ([] === $args) {
+        throw new ProblemException('At least one argument is required for composer:dev (e.g., "install", "update")');
+    }
+
     $args[] = '--dev';
     exec($args);
 }
@@ -35,5 +40,9 @@ function execGlobal(
     #[AsRawTokens]
     array $args = [],
 ): void {
+    if ([] === $args) {
+        throw new ProblemException('At least one argument is required for composer:global (e.g., "require vendor/package")');
+    }
+
     exec(['global', ...$args]);
 }
