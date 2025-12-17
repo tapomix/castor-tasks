@@ -26,7 +26,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.1.0"
+        "tapomix/castor-tasks": "^0.1"
     }
 }
 ```
@@ -43,7 +43,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.1.0"
+        "tapomix/castor-tasks": "^0.1"
     }
 }
 ```
@@ -68,9 +68,11 @@ Or you can add this to your existing `castor.php` file:
 // .castor/castor.php
 <?php
 
+use Castor\Helper\PathHelper;
+
 use function Castor\import;
 
-import('.castor/vendor/tapomix/castor-tasks/src/');
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/src/'); // import all tasks
 // define('TAPOMIX_APP_ENV_FILE', '.env.docker');
 ```
 
