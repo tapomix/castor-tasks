@@ -4,6 +4,7 @@ namespace Tapomix\Castor;
 
 use Castor\Attribute\AsContext;
 use Castor\Context;
+use Castor\Helper\PathHelper;
 use Symfony\Component\Process\Process;
 
 use function Castor\fs;
@@ -25,13 +26,17 @@ function default_context(): Context
         define('TAPOMIX_APP_ENV_FILE', '.env.docker');
     }
 
+    $root = PathHelper::getRoot();
+
     // load app env first to enable variable interpolation
-    if (fs()->exists(TAPOMIX_APP_ENV_FILE)) {
-        load_dot_env(TAPOMIX_APP_ENV_FILE);
+    $appEnvFile = $root . '/' . TAPOMIX_APP_ENV_FILE;
+    if (fs()->exists($appEnvFile)) {
+        load_dot_env($appEnvFile);
     }
 
-    if (fs()->exists(TAPOMIX_CASTOR_ENV_FILE)) {
-        load_dot_env(TAPOMIX_CASTOR_ENV_FILE);
+    $castorEnvFile = $root . '/' . TAPOMIX_CASTOR_ENV_FILE;
+    if (fs()->exists($castorEnvFile)) {
+        load_dot_env($castorEnvFile);
     }
 
     $data = [

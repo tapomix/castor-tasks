@@ -3,6 +3,7 @@
 namespace Tapomix\Castor;
 
 use Castor\Attribute\AsTask;
+use Castor\Helper\PathHelper;
 use Symfony\Component\Process\ExecutableFinder;
 
 use function Castor\check as castor_check;
@@ -51,7 +52,7 @@ function checkFiles(array $files): void
         castor_check(
             \sprintf('%s file ?', \ucfirst($label)),
             \sprintf('%s file "%s" missing', \ucfirst($label), $file),
-            fn (): bool => fs()->exists($file)
+            fn (): bool => fs()->exists(PathHelper::getRoot() . '/' . $file)
         );
     }
 }

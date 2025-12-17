@@ -7,6 +7,7 @@ use Castor\Attribute\AsTask;
 use Castor\Console\Output\VerbosityLevel;
 use Castor\Context;
 use Castor\Exception\ProblemException;
+use Castor\Helper\PathHelper;
 use Symfony\Component\Process\Process;
 
 use function Castor\context;
@@ -78,12 +79,13 @@ function shell(
 /** @return string[] */
 function buildBaseDockerComposeCmd(): array
 {
-    $dockerEnvFile = (string) variable('DOCKER.ENV_FILE');
     $appEnvironment = (string) variable('APP.ENVIRONMENT');
+    $root = PathHelper::getRoot();
 
+    $dockerEnvFile = $root . '/' . variable('DOCKER.ENV_FILE');
     $envCompose = 'compose.' . $appEnvironment . '.yaml';
 
-    if (!fs()->exists($envCompose)) {
+    if (!fs()->exists($root . '/' . $envCompose)) {
         throw new ProblemException('Specific Docker Compose not found');
     }
 
@@ -92,7 +94,7 @@ function buildBaseDockerComposeCmd(): array
     }
 
     // ! prod ! ensure the file always exist to use as secret
-    $composerAuthFile = '.docker/.composer-auth.json';
+    $composerAuthFile = $root . '/.docker/.composer-auth.json';
     if (
         'prod' === $appEnvironment
         && !fs()->exists($composerAuthFile)
@@ -106,7 +108,7 @@ function buildBaseDockerComposeCmd(): array
         $envCompose, // env specific
     ];
 
-    if (fs()->exists('compose.override.yaml')) {
+    if (fs()->exists($root . '/compose.override.yaml')) {
         $composes[] = 'compose.override.yaml'; // custom override
     }
 
@@ -118,7 +120,7 @@ function buildBaseDockerComposeCmd(): array
 
     foreach ($composes as $compose) {
         $cmd[] = '-f';
-        $cmd[] = $compose;
+        $cmd[] = $root . '/' . $compose;
     }
 
     // finally, add the env file

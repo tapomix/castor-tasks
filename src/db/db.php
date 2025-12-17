@@ -2,6 +2,8 @@
 
 namespace Tapomix\Castor\Db;
 
+use Castor\Helper\PathHelper;
+
 use function Castor\variable;
 
 /**
@@ -15,7 +17,7 @@ function buildDumpFileName(string $timing, bool $local = false): string
     $dumpName = '/dump-' . variable('APP.NAME') . '-' . $timing . '.sql';
 
     return $local
-        ? '.docker/db/sql' . $dumpName
+        ? PathHelper::getRoot() . '/.docker/db/sql' . $dumpName
         : '/sql' . $dumpName
     ;
 }
