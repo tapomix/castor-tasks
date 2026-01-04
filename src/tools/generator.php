@@ -2,6 +2,7 @@
 
 namespace Tapomix\Castor\Tools;
 
+use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 
 use function Castor\io;
@@ -45,8 +46,10 @@ function generatePassword(int $length = 16): string
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random password', aliases: ['password'])]
-function password(int $length = 16): void
-{
+function password(
+    #[AsOption(description: 'Choose password length (min: 12)', shortcut: 'l')]
+    int $length = 16,
+): void {
     $password = generatePassword($length);
     io()->text('Copy+Paste your new password : ' . $password);
 }
@@ -64,8 +67,10 @@ function generateToken(int $length = 32): string
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random token', aliases: ['token'])]
-function token(int $length = 32): void
-{
+function token(
+    #[AsOption(description: 'Choose password length (min: 4)', shortcut: 'l')]
+    int $length = 32,
+): void {
     $token = generateToken($length);
     io()->text('Copy+Paste your new token : ' . $token);
 }
