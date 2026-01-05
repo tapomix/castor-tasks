@@ -6,14 +6,20 @@ This directory contains the test suite for the Tapomix Castor Tasks collection.
 
 ```tree
 tests/
-├── Unit/                     # Unit tests for helper functions
+├── Unit/                          # Unit tests for helper functions
+│   ├── Dns/
+│   │   └── DnsToolsTest.php
+│   ├── Enums/
+│   │   ├── DNSSecAlgorithmTest.php
+│   │   ├── DNSSecFlagTest.php
+│   │   └── DNSZoneContextTest.php
 │   ├── DbValidationTest.php
 │   └── GeneratorTest.php
-├── Integration/              # Basic integration tests
+├── Integration/                   # Basic integration tests
 │   └── CheckTaskTest.php
-├── autoload.php              # Auto-loads all PHP files from src/ for testing
-├── TaskTestCase.php          # Base test class for task testing
-└── README.md                 # This file
+├── autoload.php                   # Auto-loads all PHP files from src/ for testing
+├── TaskTestCase.php               # Base test class for task testing
+└── README.md                      # This file
 ```
 
 ## Running Tests
@@ -99,6 +105,15 @@ class MyTest extends TestCase
   - Password complexity requirements (lowercase, uppercase, numbers, special chars)
   - Token generation with hexadecimal output
   - Randomness verification
+- **Dns/DnsToolsTest** - Tests for DNS zone management tools (61 tests)
+  - Zone name validation
+  - Zone file path building
+  - DNSSEC key extraction (tag, data, algorithm)
+  - Serial number computation and extraction
+  - File loading utilities
+- **Enums/DNSSecAlgorithmTest** - Tests for DNSSEC algorithm enum (20 tests)
+- **Enums/DNSSecFlagTest** - Tests for DNSSEC flag enum (20 tests)
+- **Enums/DNSZoneContextTest** - Tests for DNS zone context enum (20 tests)
 
 ### Integration Tests (`tests/Integration/`)
 
