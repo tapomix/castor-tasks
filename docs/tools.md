@@ -59,12 +59,12 @@ castor password
 
 # Generate password with custom length
 castor password --length=32
-castor password --length=20
+castor password -l 20
 ```
 
 **Options:**
 
-- `--length=<number>` - Password length (default: 16, minimum: 12)
+- `-l, --length=<number>` - Password length (default: 16, minimum: 12)
 
 **How it works:**
 
@@ -97,12 +97,12 @@ castor token
 
 # Generate token with custom length
 castor token --length=64
-castor token --length=16
+castor token -l 16
 ```
 
 **Options:**
 
-- `--length=<number>` - Token length (default: 32, minimum: 4)
+- `-l, --length=<number>` - Token length (default: 32, minimum: 4)
 
 **How it works:**
 
