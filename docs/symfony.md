@@ -69,7 +69,7 @@ APP_SERVICE_PHP=app
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `APP.FRAMEWORK` | `vanilla` | Must be set to `symfony` to enable these tasks |
 | `DOCKER.SERVICES.PHP` | `php` | PHP service name in docker-compose |
 

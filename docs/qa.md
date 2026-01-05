@@ -275,7 +275,7 @@ If your code is at the root level of your project, use `.` as value.
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `APP.CODE_PATH` | `code` | Path to application code in container |
 | `APP.FRAMEWORK` | `vanilla` | Framework type (affects availability of `lint`, `pint`, `twig-cs`) |
 | `DOCKER.SERVICES.PHP` | `php` | PHP service name in docker-compose |

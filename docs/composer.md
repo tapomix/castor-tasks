@@ -117,7 +117,7 @@ APP_SERVICE_PHP=app
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `DOCKER.SERVICES.PHP` | `php` | PHP service name in docker-compose |
 
 ---

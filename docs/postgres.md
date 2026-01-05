@@ -225,7 +225,7 @@ services:
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `APP.NAME` | `app` | Application name (used in backup file naming) |
 | `APP.DB.NAME` | `db` | Database name |
 | `APP.DB.USER` | `user` | Database user |

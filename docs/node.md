@@ -57,7 +57,7 @@ APP_SERVICE_NODE=frontend
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `DOCKER.SERVICES.NODE` | `node` | Node service name in docker-compose |
 
 ---

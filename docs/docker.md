@@ -292,7 +292,7 @@ APP_SERVICE_PHP=phpfpm
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `DOCKER.ENV_FILE` | `.env.docker` | Path to Docker environment file |
 | `APP.ENVIRONMENT` | `dev` | Application environment (determines which compose file to load) |
 | `DOCKER.SERVICES.DB` | `db` | Database service name |

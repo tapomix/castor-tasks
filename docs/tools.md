@@ -143,7 +143,7 @@ APP_SERVER_NAME=myapp.local
 ### Context Variables Used
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `APP.SERVER_NAME` | `localhost` | Server hostname for browser task |
 | `CASTOR.DEFAULT_BROWSER` | `firefox` | Default browser executable |
 

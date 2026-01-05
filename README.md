@@ -107,7 +107,7 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 ### Available Configuration Variables
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `APP_CODE_PATH` | `code` | Path to application code in container |
 | `APP_DB_NAME` | `db` | Database name |
 | `APP_DB_USER` | `user` | Database user |
