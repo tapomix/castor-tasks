@@ -232,6 +232,19 @@ castor pg:backup <timestamp>
 castor pg:restore <timestamp>
 ```
 
+### 🔐 [DNS/DNSSEC Tasks](docs/dns.md) (`tapomix-dns`)
+
+DNSSEC zone signing and key management.
+
+```bash
+castor keys:generate <zone>
+castor keys:list <zone>
+castor zone:sign <zone>
+castor zone:check <zone>
+castor zone:verify <zone>
+castor dig <args>
+```
+
 ### 🛠️ [Development Tools](docs/tools.md) (`tapomix-tools`)
 
 Development utilities.
