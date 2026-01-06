@@ -72,11 +72,29 @@ use Castor\Helper\PathHelper;
 
 use function Castor\import;
 
-import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/src/'); // import all tasks
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/all.php'); // import all tasks
 // define('TAPOMIX_APP_ENV_FILE', '.env.docker');
 ```
 
 **Why not remote-import?** Remote imports change the `workingDirectory` in the context, which we want to avoid.
+
+### Presets
+
+You don't have to load all tasks. The `presets/` directory contains files with only specific task groups. To use a preset, simply replace the `import` line in your `castor.php` (**replace** `<preset>` with one from the list below):
+
+```php
+// .castor/castor.php
+
+// ...
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset>.php');
+```
+
+**Available presets:**
+
+| Preset | Description |
+| ------ | ----------- |
+| `all.php` | All tasks |
+| `dns.php` | DNS/DNSSEC tasks only |
 
 ### Structure
 
