@@ -26,7 +26,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.1"
+        "tapomix/castor-tasks": "^0.3"
     }
 }
 ```
@@ -43,7 +43,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.1"
+        "tapomix/castor-tasks": "^0.3"
     }
 }
 ```
@@ -322,7 +322,3 @@ castor test --testsuite=Integration
 ```
 
 See [`tests/README.md`](tests/README.md) for detailed testing documentation.
-
-## License
-
-MIT License

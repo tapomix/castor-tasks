@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.0] - 2026-01-06
+
+### Added
+
+- DNS tasks namespace (`tapomix-dns`) with DiG queries, DNSSEC key generation, and zone management
+- Unit tests for DNS utilities
+- Shortcut `-l` for `--length` option on password and token generators
+- Presets system for task grouping (`all`, `dns`)
+
+---
+
 ## [0.2.0] - 2025-12-17
 
 ### Added
