@@ -1,19 +1,32 @@
-# Castor
+# ide
+/.idea/
+/.vscode/
+
+# castor
 .castor.stub.php
 
-/vendor/
+/.castor/git-frozen-exclude.php
+/.castor/git-frozen-sync.php
 
+# claude
+.claude/
+/CLAUDE.md
+
+# qa
+/.php-cs-fixer.php
 /.php-cs-fixer.cache
 
-# PHPUnit
 /.phpunit.cache
 /.phpunit.result.cache
 /phpunit.xml
 
-.env
+/phpstan.neon
 
-# Claude
-.claude/
-/CLAUDE.md
+# env vars
+/.env
 
+# libraries
+/vendor/
+
+# misc
 /TODO.md
