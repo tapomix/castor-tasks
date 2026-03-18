@@ -114,6 +114,9 @@ class MyTest extends TestCase
 - **Enums/DNSSecAlgorithmTest** - Tests for DNSSEC algorithm enum (20 tests)
 - **Enums/DNSSecFlagTest** - Tests for DNSSEC flag enum (20 tests)
 - **Enums/DNSZoneContextTest** - Tests for DNS zone context enum (20 tests)
+- **Infra/SyncTest** - Tests for infra sync helper functions (8 tests)
+  - File list computation after applying exclusions
+  - Edge cases: empty lists, unknown exclusions, full exclusion, key re-indexing
 
 ### Integration Tests (`tests/Integration/`)
 
