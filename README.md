@@ -250,6 +250,15 @@ castor pg:backup <timestamp>
 castor pg:restore <timestamp>
 ```
 
+### 🏗️ [Infra Tasks](docs/infra.md) (`tapomix-infra`)
+
+Synchronize frozen files from a shared infrastructure remote.
+
+```bash
+castor infra:sync
+castor infra:sync --remote=upstream --branch=develop
+```
+
 ### 🔐 [DNS/DNSSEC Tasks](docs/dns.md) (`tapomix-dns`)
 
 DNSSEC zone signing and key management.
