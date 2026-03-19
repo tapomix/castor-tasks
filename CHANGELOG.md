@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.1] - 2026-03-19
+
+### Added
+
+- Infrastructure tasks namespace (`tapomix-infra`) with `infra:sync` task to sync frozen files from a Git remote
+- Unit tests for `infra:sync`
+- Documentation for the `infra` namespace
+
+### Changed
+
+- Updated Composer dependencies
+- Renamed interpolated server name variable in `.env.dist.castor`
+- Reorganized `.gitignore` and added frozen files to ignore list
+
+---
+
 ## [0.3.0] - 2026-01-06
 
 ### Added
