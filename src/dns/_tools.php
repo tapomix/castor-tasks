@@ -118,7 +118,9 @@ function extractKeyData(string $keyFileName): array
 
     // syntax: <zone> <?TTL> <CLASS> DNSKEY <flags> <protocol> <algorithm> <public_key_base64>
     // example: example.com. IN DNSKEY 257 3 13 aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz+1234567==
-    \preg_match('/DNSKEY\s+(\d+)\s+\d+\s+(\d+)\s+(.+)/', (string) $dnskeyLine, $matches);
+    if (1 !== \preg_match('/DNSKEY\s+(\d+)\s+\d+\s+(\d+)\s+(.+)/', (string) $dnskeyLine, $matches)) {
+        throw new \RuntimeException('Unable to extract key data from: ' . $keyFileName);
+    }
 
     return [
         'flag' => DNSSecFlag::from((int) $matches[1]),
