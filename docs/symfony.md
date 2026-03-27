@@ -1,18 +1,56 @@
 # Symfony Tasks
 
-Symfony Console command wrapper that executes in Docker containers.
+Symfony tasks for project installation and Console command execution in Docker containers.
 
 **Namespace:** `tapomix-symfony`
 
 ## Overview
 
-This task provides a convenient way to execute Symfony Console commands inside your Docker PHP container.
+These tasks provide project bootstrapping and a convenient way to execute Symfony Console commands inside your Docker PHP container.
 
 The Console command is executed using `docker-compose exec` in the PHP service, so **the container must be started** to execute commands.
 
-**Availability:** This task is only available when `APP_FRAMEWORK=symfony` in `.castor/.env.castor`.
+**Availability:** These tasks are only available when `APP_FRAMEWORK=symfony` in `.castor/.env.castor`.
 
 ## Available Tasks
+
+### `install` - Install New Symfony Project
+
+Bootstrap a new Symfony project inside the PHP Docker container.
+
+**Aliases:** `tapomix-symfony:install`, `symfony`
+
+**Usage:**
+
+```bash
+castor symfony:install [--full] [--symfony-version=<version>]
+
+# Minimal install (skeleton only, ideal for API)
+castor symfony:install
+
+# Full webapp (adds Twig, Doctrine, Security, Profiler)
+castor symfony:install --full
+
+# Specific Symfony version
+castor symfony:install --symfony-version='^7.2'
+castor symfony:install --full --symfony-version='^7.2'
+```
+
+**Options:**
+
+| Option | Shortcut | Default | Description |
+| ------ | -------- | ------- | ----------- |
+| `--full` / `--no-full` | `-f` | `false` | Install full webapp metapackage |
+| `--symfony-version` | `-s` | `^8.0` | Symfony version constraint |
+
+**How it works:**
+
+1. Creates a new Symfony skeleton project via `composer create-project`
+2. Moves the files into the code directory
+3. If `--full`: runs `composer require webapp`
+4. Installs dev dependencies (PHPStan, Rector, PHP-CS-Fixer, Twig-CS-Fixer, Maker Bundle, etc.)
+
+---
 
 ### `console` - Execute Console Command
 

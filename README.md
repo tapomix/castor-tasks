@@ -204,6 +204,8 @@ castor composer:global <command>
 Available when `APP_FRAMEWORK=symfony`
 
 ```bash
+castor symfony:install
+castor symfony:install --full
 castor console cache:clear
 castor console debug:router
 ```
