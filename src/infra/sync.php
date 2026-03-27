@@ -66,9 +66,30 @@ function sync(
     run(['git', 'fetch', $remote]);
 
     io()->text('Restoring frozen files...');
-    run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$filesToSync]);
+    checkoutFiles($remote, $branch, $filesToSync);
+
+    // Re-read the frozen files list in case it was updated during sync (e.g. new files added to the list)
+    /** @var string[] $updatedFrozenFiles */
+    $updatedFrozenFiles = require TAPOMIX_FROZEN_FILES_SYNC_PATH;
+    $updatedFilesToSync = computeFilesToSync($updatedFrozenFiles, $excludedFiles);
+    $newFiles = \array_values(\array_diff($updatedFilesToSync, $filesToSync));
+
+    if ([] !== $newFiles) {
+        io()->text('Changes detected in updated frozen list, resyncing...');
+        checkoutFiles($remote, $branch, $newFiles);
+    }
 
     io()->success('Frozen files updated.');
+}
+
+/**
+ * Checkout files from a remote branch.
+ *
+ * @param string[] $files
+ */
+function checkoutFiles(string $remote, string $branch, array $files): void
+{
+    run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$files]);
 }
 
 /**
