@@ -18,7 +18,7 @@ The Console command is executed using `docker-compose exec` in the PHP service, 
 
 Bootstrap a new Symfony project inside the PHP Docker container.
 
-**Aliases:** `tapomix-symfony:install`, `symfony`
+**Aliases:** `tapomix-symfony:install`, `symfony`, `symfony:install`
 
 **Usage:**
 
@@ -47,8 +47,12 @@ castor symfony:install --full --symfony-version='^7.2'
 
 1. Creates a new Symfony skeleton project via `composer create-project`
 2. Moves the files into the code directory
-3. If `--full`: runs `composer require webapp`
-4. Installs dev dependencies (PHPStan, Rector, PHP-CS-Fixer, Twig-CS-Fixer, Maker Bundle, etc.)
+3. Configures Composer automatically:
+   - Disables Docker recipe integration (project manages its own Docker infrastructure)
+   - Restricts to official recipes only (prevents interactive prompts for contrib recipes)
+   - Allows the PHPStan extension-installer plugin
+4. If `--full`: runs `composer require webapp`
+5. Installs dev dependencies (PHPStan, Rector, PHP-CS-Fixer, Twig-CS-Fixer, Maker Bundle, etc.)
 
 ---
 
@@ -56,7 +60,7 @@ castor symfony:install --full --symfony-version='^7.2'
 
 Execute any Symfony Console command in the PHP Docker container.
 
-**Aliases:** `tapomix-symfony:console`, `console`
+**Aliases:** `tapomix-symfony:console`, `console`, `symfony:console`
 
 **Usage:**
 
