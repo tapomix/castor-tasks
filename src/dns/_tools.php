@@ -157,7 +157,7 @@ function buildNextSerial(string $zone): int
 
     $currentSerial = $zoneFinder->hasResults()
         // got a file ... load the content and extract current serial
-        ? $currentSerial = extractCurrentSerial(getFirstItemFinder($zoneFinder)->getPathname())
+        ? extractCurrentSerial(getFirstItemFinder($zoneFinder)->getPathname())
         // no signed file yet ... start from 0
         : 0
     ;
