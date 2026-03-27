@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.2] - 2026-03-27
+
+### Added
+
+- `symfony:install` task to bootstrap a new Symfony project
+- Documentation for `symfony:install` in `docs/symfony.md`
+
+### Fixed
+
+- `infra:sync` now detects new files added to the frozen list during sync
+- PHPStan errors in DNS `_tools.php`
+
+### Changed
+
+- Extracted `checkoutFiles()` helper in `infra:sync` to avoid duplicated calls
+
+---
+
 ## [0.3.1] - 2026-03-19
 
 ### Added
