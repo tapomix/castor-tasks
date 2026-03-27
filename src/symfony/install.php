@@ -16,7 +16,7 @@ use function Tapomix\Castor\Docker\exec as docker_exec;
 
 define('TAPOMIX_NAMESPACE_SYMFONY', 'tapomix-symfony');
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_SYMFONY, description: 'Install new Symfony project', aliases: ['symfony'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_SYMFONY, description: 'Install new Symfony project', aliases: ['symfony', 'symfony:install'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
 function install(
     #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Install full webapp')]
     bool $full = false,
