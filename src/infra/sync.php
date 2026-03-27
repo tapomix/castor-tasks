@@ -21,9 +21,9 @@ define('TAPOMIX_FROZEN_FILES_EXCLUDE_PATH', PathHelper::getRoot() . '/.castor/gi
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_INFRA, description: 'Sync frozen files from the infra remote', aliases: ['infra:sync'])]
 function sync(
-    #[AsOption(description: 'Infra remote name', shortcut: 'r')]
+    #[AsOption(shortcut: 'r', description: 'Infra remote name')]
     string $remote = 'infra',
-    #[AsOption(description: 'Branch to sync from', shortcut: 'b')]
+    #[AsOption(shortcut: 'b', description: 'Branch to sync from')]
     string $branch = 'main',
 ): void {
     io()->title(\sprintf('Syncing frozen files from remote "%s"', $remote));

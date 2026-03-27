@@ -11,10 +11,10 @@ use Tapomix\Castor\Enums\DNSSecFlag;
 use function Castor\fs;
 use function Castor\io;
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_DNS, name: 'generate', description: 'Generate KSK+ZSK keys', aliases: ['keys:generate'])]
+#[AsTask(name: 'generate', namespace: TAPOMIX_NAMESPACE_DNS, description: 'Generate KSK+ZSK keys', aliases: ['keys:generate'])]
 function generate(
     string $zone,
-    #[AsOption(name: 'algorithm', description: 'Algorithm', shortcut: 'a')]
+    #[AsOption(name: 'algorithm', shortcut: 'a', description: 'Algorithm')]
     int $algo = DNSSecAlgorithm::ED25519->value,
 ): void {
     if (!isValidZoneName($zone)) {
@@ -69,7 +69,7 @@ function generate(
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DNS, description: 'List all DNSSEC keys for a zone', aliases: ['keys:list'])]
 function listing(
     string $zone,
-    #[AsOption(name: 'only-ksk', shortcut: 'k', description: 'List only KSK keys', mode: InputOption::VALUE_NONE)]
+    #[AsOption(name: 'only-ksk', shortcut: 'k', mode: InputOption::VALUE_NONE, description: 'List only KSK keys')]
     bool $onlyKsk,
 ): void {
     if (!isValidZoneName($zone)) {

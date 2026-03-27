@@ -22,7 +22,7 @@ function default_context(): Context
     );
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_DEV, description: 'Run QA tools', default: true, aliases: ['qa'])]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_DEV, description: 'Run QA tools', aliases: ['qa'], default: true)]
 function qa(): void
 {
     io()->info('Run QA tools');

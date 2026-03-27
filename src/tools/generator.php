@@ -47,7 +47,7 @@ function generatePassword(int $length = 16): string
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random password', aliases: ['password'])]
 function password(
-    #[AsOption(description: 'Choose password length (min: 12)', shortcut: 'l')]
+    #[AsOption(shortcut: 'l', description: 'Choose password length (min: 12)')]
     int $length = 16,
 ): void {
     $password = generatePassword($length);
@@ -68,7 +68,7 @@ function generateToken(int $length = 32): string
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random token', aliases: ['token'])]
 function token(
-    #[AsOption(description: 'Choose password length (min: 4)', shortcut: 'l')]
+    #[AsOption(shortcut: 'l', description: 'Choose password length (min: 4)')]
     int $length = 32,
 ): void {
     $token = generateToken($length);
