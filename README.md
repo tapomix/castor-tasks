@@ -95,6 +95,8 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset
 | ------ | ----------- |
 | `all.php` | All tasks |
 | `dns.php` | DNS/DNSSEC tasks only |
+| `infra.php` | Infra sync tasks only |
+| `php.php` | All tasks for a PHP project |
 
 ### Structure
 
