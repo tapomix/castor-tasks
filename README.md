@@ -261,6 +261,14 @@ castor infra:sync
 castor infra:sync --remote=upstream --branch=develop
 ```
 
+### 🚀 [VPS Tasks](docs/vps.md) (`tapomix-vps`)
+
+Update and restart the app on the VPS after new code has been pushed to it.
+
+```bash
+castor vps:deploy
+```
+
 ### 🔐 [DNS/DNSSEC Tasks](docs/dns.md) (`tapomix-dns`)
 
 DNSSEC zone signing and key management.
