@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.4] - 2026-08-08
+
+### Added
+
+- VPS tasks namespace (`tapomix-vps`) with `vps:deploy` task
+- Documentation for the `vps` namespace
+- `infra.php` and `php.php` presets
+
+### Changed
+
+- `symfony:install` now passes `--json` and `--no-interaction` to `composer` calls
+
+### Fixed
+
+- Use `.docker/db/dump` instead of `.docker/db/sql` for local SQL dumps
+
+---
+
 ## [0.3.3] - 2026-03-27
 
 ### Added
