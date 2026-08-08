@@ -17,7 +17,7 @@ function buildDumpFileName(string $timing, bool $local = false): string
     $dumpName = '/dump-' . variable('APP.NAME') . '-' . $timing . '.sql';
 
     return $local
-        ? PathHelper::getRoot() . '/.docker/db/sql' . $dumpName
+        ? PathHelper::getRoot() . '/.docker/db/dump' . $dumpName
         : '/sql' . $dumpName
     ;
 }

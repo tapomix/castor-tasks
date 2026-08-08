@@ -107,7 +107,9 @@ docker compose (...options...) exec db pg_dump -O -U user -f /sql/dump-app-2024-
 
 **Backup location:**
 
-Backups are saved in `.docker/db/sql/` directory with the naming pattern:
+> **Note:** the local directory is named `dump` (`.docker/db/dump/`), while it is mounted as `/sql` inside the container. The naming differs between the two sides on purpose — don't confuse them.
+
+Backups are saved in `.docker/db/dump/` directory with the naming pattern:
 
 ```txt
 dump-{APP_NAME}-{timing}.sql
@@ -116,7 +118,7 @@ dump-{APP_NAME}-{timing}.sql
 **Example:**
 
 ```txt
-.docker/db/sql/dump-myapp-2024-11-19-1430.sql
+.docker/db/dump/dump-myapp-2024-11-19-1430.sql
 ```
 
 ---
@@ -209,7 +211,7 @@ Ensure the backup directory exists in your project:
 project-root/
 └── .docker/
     └── db/
-        └── sql/  # Backup files stored here
+        └── dump/  # Backup files stored here
 ```
 
 This directory should be mounted as a volume in your `compose.yaml`:
@@ -219,7 +221,7 @@ services:
   db:
     image: postgres:16-alpine
     volumes:
-      - .docker/db/sql:/sql
+      - .docker/db/dump:/sql # local "dump" dir mounted as "/sql" in the container
 ```
 
 ### Context Variables Used
