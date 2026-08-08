@@ -43,14 +43,14 @@ function install(
     docker_exec($servicePHP, ['rm', '-r', $frameworkContainerPath]);
 
     // disable Docker config from recipes (project manages its own Docker infrastructure)
-    composer_exec(['config', 'extra.symfony.docker', 'false']);
+    composer_exec(['config', '--json', 'extra.symfony.docker', 'false']);
     // official recipes only — also prevents interactive prompts for contrib recipes
-    composer_exec(['config', 'extra.symfony.allow-contrib', 'false']);
+    composer_exec(['config', '--json', 'extra.symfony.allow-contrib', 'false']);
     // allow phpstan extension-installer plugin (required before requiring it non-interactively)
-    composer_exec(['config', 'allow-plugins.phpstan/extension-installer', 'true']);
+    composer_exec(['config', '--json', 'allow-plugins.phpstan/extension-installer', 'true']);
 
     if ($full) {
-        composer_exec(['require', 'webapp']);
+        composer_exec(['require', '--no-interaction', 'webapp']);
     }
 
     // install dev dependencies
@@ -60,7 +60,6 @@ function install(
         'symfony/maker-bundle',
         'symfony/web-profiler-bundle', // toolbar
         // qa tools
-        'carthage-software/mago',
         'friendsofphp/php-cs-fixer',
         'phpstan/extension-installer', // also install phpstan/phpstan
         'phpstan/phpstan-symfony',
@@ -70,5 +69,5 @@ function install(
         'vincentlanglet/twig-cs-fixer',
     ];
 
-    composer_dev(['require', ...$devPackages]);
+    composer_dev(['require', '--no-interaction', ...$devPackages]);
 }
