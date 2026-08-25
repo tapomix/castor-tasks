@@ -63,7 +63,35 @@ function default_context(): Context
 
     return new Context(
         data: $data,
-        tty: Process::isTtySupported(),
+        tty: hasControllingTty(),
         allowFailure: true,
     );
+}
+
+/**
+ * A supported TTY is not enough: Symfony literally opens `/dev/tty` when TTY mode is enabled.
+ *
+ * A castor spawned by another castor (`qa:all` starts one child per analyzer) runs behind a
+ * PTY, so its stdout *is* a TTY and `Process::isTtySupported()` returns true — but it inherits
+ * no controlling terminal when the top-level castor had none. Opening `/dev/tty` then fails
+ * and every child dies before starting.
+ *
+ * Invisible from a terminal, where `/dev/tty` exists. It only bites callers that have none:
+ * git hooks, CI, systemd timers, and AI coding agents shelling out to a castor task.
+ */
+function hasControllingTty(): bool
+{
+    if (!Process::isTtySupported()) {
+        return false;
+    }
+
+    $tty = @fopen('/dev/tty', 'r');
+
+    if (false === $tty) {
+        return false;
+    }
+
+    fclose($tty);
+
+    return true;
 }
