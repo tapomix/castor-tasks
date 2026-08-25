@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapomix\Castor\Db\Postgres;
 
 use Castor\Attribute\AsTask;
