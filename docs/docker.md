@@ -13,6 +13,7 @@ project-root/
 ├── compose.yaml           # Base compose file (required)
 ├── compose.dev.yaml       # Development compose file (required in dev)
 ├── compose.prod.yaml      # Production compose file (required in prod)
+├── compose.app.yaml       # Optional project-wide layer (committed)
 ├── compose.override.yaml  # Optional local overrides (gitignored)
 └── .env(.docker)          # Docker environment variables (required)
 ```
@@ -21,8 +22,41 @@ The tasks automatically:
 
 - Load the base `compose.yaml` file
 - Load environment-specific compose file based on `APP_ENVIRONMENT` variable
+- Load `compose.app.yaml` if it exists
 - Load `compose.override.yaml` if it exists
+- Pass `--profile <APP_ENVIRONMENT>` to every command
 - Use the environment file defined in `DOCKER.ENV_FILE` (default: `.env.docker`)
+
+### Layer order
+
+```txt
+compose.yaml > compose.{env}.yaml > compose.app.yaml > compose.override.yaml
+```
+
+`compose.app.yaml` is the slot for configuration specific to a project but common to every
+environment and every developer — it is **committed**, unlike `compose.override.yaml`. It sits
+*after* the environment file so it can override an infra default, which matters when the base
+files are synced from a template and must not be edited locally.
+
+### Environment-specific services
+
+A service that only makes sense in one environment lives in `compose.app.yaml` too, gated by a
+Compose profile:
+
+```yaml
+services:
+  queue:
+    profiles: [prod]
+    # ...
+```
+
+Every task passes `--profile ${APP_ENVIRONMENT}`, so profiled services follow the whole
+lifecycle — a `stop` tears down what a `start` created. Services with no `profiles` key are
+always active.
+
+> ⚠️ The profile is always the value of `APP_ENVIRONMENT`, i.e. `dev` or `prod` in a standard
+> setup. A project using a third environment (`staging`, `test`, ...) will not activate
+> `dev`- or `prod`-profiled services.
 
 ## Available Tasks
 

@@ -110,6 +110,11 @@ function buildBaseDockerComposeCmd(): array
         $envCompose, // env specific
     ];
 
+    // project-wide, committed: common to every environment of this project
+    if (fs()->exists($root . '/compose.app.yaml')) {
+        $composes[] = 'compose.app.yaml';
+    }
+
     if (fs()->exists($root . '/compose.override.yaml')) {
         $composes[] = 'compose.override.yaml'; // custom override
     }
@@ -124,6 +129,10 @@ function buildBaseDockerComposeCmd(): array
         $cmd[] = '-f';
         $cmd[] = $root . '/' . $compose;
     }
+
+    // let compose.app.yaml gate services per environment (profiles: [dev] / [prod])
+    $cmd[] = '--profile';
+    $cmd[] = $appEnvironment;
 
     // finally, add the env file
     $cmd[] = '--env-file=' . $dockerEnvFile;

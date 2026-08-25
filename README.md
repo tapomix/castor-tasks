@@ -112,7 +112,8 @@ project-root/
 ├── compose.yaml              # Base compose file (required)
 ├── compose.dev.yaml          # Development compose file
 ├── compose.prod.yaml         # Production compose file
-├── compose.override.yaml     # Optional override (gitignored)
+├── compose.app.yaml          # Optional project-wide layer (committed)
+├── compose.override.yaml     # Optional local override (gitignored)
 └── .env(.docker)             # Docker environment variables
 ```
 
