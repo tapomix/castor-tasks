@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.5] - 2026-08-26
+
+### Added
+
+- Support for `compose.app.yaml`, an optional project-wide Compose layer, committed and loaded after the environment file
+- `--profile <APP_ENVIRONMENT>` on every Docker task, to gate services per environment
+- Documentation for the Compose layer order and profiles in `docs/docker.md`
+
+### Changed
+
+- `declare(strict_types=1)` in every source file, now enforced by PHP-CS-Fixer
+- Removed deprecated rules from the Rector configuration
+- Updated Composer dependencies
+
+### Fixed
+
+- Castor tasks died on start when no controlling terminal was available (Git hooks, CI, coding agents)
+- `composer` in the QA image resolved to the vendored copy, destroying the autoload it ran from
+
+---
+
 ## [0.3.4] - 2026-08-08
 
 ### Added
