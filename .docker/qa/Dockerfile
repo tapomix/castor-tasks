@@ -17,8 +17,9 @@ RUN addgroup -g ${GID} ${USER} \
 # install composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# add composer bin to PATH
-ENV PATH="/app/vendor/bin:${PATH}"
+# vendor/bin goes last so `composer` stays the system phar: castor pulls in composer/composer,
+# and that copy would rewrite the vendor it runs from, destroying its own autoload.
+ENV PATH="${PATH}:/app/vendor/bin"
 
 WORKDIR /app
 
