@@ -11,6 +11,7 @@ $finder = (new Finder())
 ;
 
 return (new Config())
+    ->setRiskyAllowed(true) // required to use "declare_strict_types"
     ->setFinder($finder)
     ->setRules([
         '@Symfony' => true,
@@ -21,6 +22,7 @@ return (new Config())
         'concat_space' => [
             'spacing' => 'one',
         ],
+        'declare_strict_types' => true, // ! risky
         'phpdoc_summary' => false,
         'phpdoc_to_comment' => [
             'ignored_tags' => [
