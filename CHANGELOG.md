@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.6] - 2026-09-02
+
+### Fixed
+
+- `infra:sync` restored nothing at all when the frozen list named a file the template had dropped: the list is now refreshed from the remote before being read
+- `infra:sync` reported a successful sync even when `git fetch` or `git checkout` had failed
+
+---
+
 ## [0.3.5] - 2026-08-26
 
 ### Added
