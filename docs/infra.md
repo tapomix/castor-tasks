@@ -33,7 +33,14 @@ return [
 ```
 
 > [!IMPORTANT]
-> This file itself is typically part of the frozen files list, meaning it is updated during sync.
+> This file is itself part of the frozen files list, and `infra:sync` restores it **before** reading it. A
+> `git checkout` is all-or-nothing: a single path that no longer exists on the remote makes git reject the
+> whole pathspec, leaving every other frozen file untouched. Reading the remote list first keeps the sync
+> self-healing when the template drops a file.
+
+> [!NOTE]
+> The sync never deletes anything. Files removed from the frozen list stay in the derived project and must
+> be cleaned up by hand.
 
 ### `.castor/git-frozen-exclude.php`
 
@@ -83,11 +90,11 @@ castor infra:sync -r upstream -b develop
 
 **How it works:**
 
-1. Loads the frozen files list from `.castor/git-frozen-sync.php`
-2. Loads the exclusion list from `.castor/git-frozen-exclude.php` (if it exists)
-3. Computes the final list: frozen files minus excluded files
-4. Verifies the specified remote exists in the repository
-5. Runs `git fetch <remote>` to retrieve the latest state
+1. Loads the exclusion list from `.castor/git-frozen-exclude.php` (if it exists)
+2. Verifies the specified remote exists in the repository
+3. Runs `git fetch <remote>` to retrieve the latest state
+4. Restores `.castor/git-frozen-sync.php` from the remote, unless the project excluded it
+5. Loads that frozen files list and computes the final list: frozen files minus excluded files
 6. Runs `git checkout <remote>/<branch> -- <files...>` to restore each frozen file
 
 ---
@@ -157,3 +164,5 @@ git commit -m "chore: sync frozen files from infra"
 | `Frozen files list not found` | `.castor/git-frozen-sync.php` is missing | Create the file or sync it manually from the infra remote |
 | `No files to sync after applying exclusions` | All frozen files are excluded | Review `.castor/git-frozen-exclude.php` |
 | `Remote "infra" not found` | The Git remote is not configured | Run `git remote add infra <url>` |
+| `Unable to fetch from remote "infra"` | The remote is unreachable or the URL is wrong | Check the remote URL and your network access |
+| `Unable to restore the frozen files` | A path in the frozen list does not exist on the remote branch | Fix the list on the infra remote, or opt out via `.castor/git-frozen-exclude.php` |

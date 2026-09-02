@@ -15,8 +15,9 @@ use function Castor\run;
 
 define('TAPOMIX_NAMESPACE_INFRA', 'tapomix-infra');
 
-/* Path to the frozen files list, defined by the template and synced to derived projects. */
-define('TAPOMIX_FROZEN_FILES_SYNC_PATH', PathHelper::getRoot() . '/.castor/git-frozen-sync.php');
+/* Frozen files list, defined by the template and synced to derived projects. */
+define('TAPOMIX_FROZEN_FILES_SYNC_NAME', '.castor/git-frozen-sync.php');
+define('TAPOMIX_FROZEN_FILES_SYNC_PATH', PathHelper::getRoot() . '/' . TAPOMIX_FROZEN_FILES_SYNC_NAME);
 
 /* Path to the exclusion list, defined by the derived project to opt out of specific frozen files. */
 define('TAPOMIX_FROZEN_FILES_EXCLUDE_PATH', PathHelper::getRoot() . '/.castor/git-frozen-exclude.php');
@@ -30,26 +31,14 @@ function sync(
 ): void {
     io()->title(\sprintf('Syncing frozen files from remote "%s"', $remote));
 
-    // load frozen files list
     if (!fs()->exists(TAPOMIX_FROZEN_FILES_SYNC_PATH)) {
         io()->error(\sprintf('Frozen files list not found at "%s".', TAPOMIX_FROZEN_FILES_SYNC_PATH));
 
         return;
     }
 
-    /** @var string[] $frozenFiles */
-    $frozenFiles = require TAPOMIX_FROZEN_FILES_SYNC_PATH;
-
     /** @var string[] $excludedFiles */
     $excludedFiles = fs()->exists(TAPOMIX_FROZEN_FILES_EXCLUDE_PATH) ? require TAPOMIX_FROZEN_FILES_EXCLUDE_PATH : [];
-
-    $filesToSync = computeFilesToSync($frozenFiles, $excludedFiles);
-
-    if ([] === $filesToSync) {
-        io()->warning('No files to sync after applying exclusions.');
-
-        return;
-    }
 
     // check that the remote exists
     $process = run(['git', 'remote'], context()->withQuiet());
@@ -65,20 +54,43 @@ function sync(
     }
 
     io()->text(\sprintf('Fetching from remote "%s"...', $remote));
-    run(['git', 'fetch', $remote]);
+    if (!run(['git', 'fetch', $remote])->isSuccessful()) {
+        io()->error(\sprintf('Unable to fetch from remote "%s".', $remote));
+
+        return;
+    }
+
+    // The list is itself frozen, so restore it before reading it: a file dropped by the template
+    // but still named in the local list makes git reject the whole pathspec, leaving every other
+    // frozen file untouched. Reading the remote list first keeps the sync self-healing.
+    if (!\in_array(TAPOMIX_FROZEN_FILES_SYNC_NAME, $excludedFiles, true)) {
+        io()->text('Updating the frozen files list...');
+
+        if (!checkoutFiles($remote, $branch, [TAPOMIX_FROZEN_FILES_SYNC_NAME])) {
+            io()->warning(\sprintf(
+                'No frozen files list on "%s/%s", falling back to the local one.',
+                $remote,
+                $branch,
+            ));
+        }
+    }
+
+    /** @var string[] $frozenFiles */
+    $frozenFiles = require TAPOMIX_FROZEN_FILES_SYNC_PATH;
+
+    $filesToSync = computeFilesToSync($frozenFiles, $excludedFiles);
+
+    if ([] === $filesToSync) {
+        io()->warning('No files to sync after applying exclusions.');
+
+        return;
+    }
 
     io()->text('Restoring frozen files...');
-    checkoutFiles($remote, $branch, $filesToSync);
+    if (!checkoutFiles($remote, $branch, $filesToSync)) {
+        io()->error(\sprintf('Unable to restore the frozen files from "%s/%s".', $remote, $branch));
 
-    // Re-read the frozen files list in case it was updated during sync (e.g. new files added to the list)
-    /** @var string[] $updatedFrozenFiles */
-    $updatedFrozenFiles = require TAPOMIX_FROZEN_FILES_SYNC_PATH;
-    $updatedFilesToSync = computeFilesToSync($updatedFrozenFiles, $excludedFiles);
-    $newFiles = \array_values(\array_diff($updatedFilesToSync, $filesToSync));
-
-    if ([] !== $newFiles) {
-        io()->text('Changes detected in updated frozen list, resyncing...');
-        checkoutFiles($remote, $branch, $newFiles);
+        return;
     }
 
     io()->success('Frozen files updated.');
@@ -89,9 +101,9 @@ function sync(
  *
  * @param string[] $files
  */
-function checkoutFiles(string $remote, string $branch, array $files): void
+function checkoutFiles(string $remote, string $branch, array $files): bool
 {
-    run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$files]);
+    return run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$files])->isSuccessful();
 }
 
 /**
