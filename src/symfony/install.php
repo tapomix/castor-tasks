@@ -72,4 +72,13 @@ function install(
     ];
 
     composer_dev(['require', '--no-interaction', ...$devPackages]);
+
+    // drop recipe files superseded by the project-level configuration
+    $codePath = PathHelper::getRoot() . '/' . variable('APP.CODE_PATH');
+
+    fs()->remove([
+        $codePath . '/.editorconfig', // `root = true` would shadow the project one
+        $codePath . '/AGENTS.md',     // superseded by the project agent rules
+        $codePath . '/CLAUDE.md',     // only imports AGENTS.md
+    ]);
 }
