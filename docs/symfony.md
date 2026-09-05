@@ -53,6 +53,7 @@ castor symfony:install --full --symfony-version='^7.2'
    - Allows the PHPStan extension-installer plugin
 4. If `--full`: runs `composer require webapp`
 5. Installs dev dependencies (PHPStan, Rector, PHP-CS-Fixer, Twig-CS-Fixer, Maker Bundle, etc.)
+6. Removes the recipe files superseded by the project-level configuration: `.editorconfig` (its `root = true` would shadow the project one), `AGENTS.md` and `CLAUDE.md`
 
 ---
 
