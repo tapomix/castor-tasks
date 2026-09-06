@@ -22,6 +22,9 @@ define('TAPOMIX_FROZEN_FILES_SYNC_PATH', PathHelper::getRoot() . '/' . TAPOMIX_F
 /* Path to the exclusion list, defined by the derived project to opt out of specific frozen files. */
 define('TAPOMIX_FROZEN_FILES_EXCLUDE_PATH', PathHelper::getRoot() . '/.castor/git-frozen-exclude.php');
 
+/* Castor own dependency lock, frozen by the template: a new one requires reinstalling its vendor. */
+define('TAPOMIX_CASTOR_LOCK_PATH', PathHelper::getRoot() . '/.castor/castor.composer.lock');
+
 #[AsTask(namespace: TAPOMIX_NAMESPACE_INFRA, description: 'Sync frozen files from the infra remote', aliases: ['infra:sync'])]
 function sync(
     #[AsOption(shortcut: 'r', description: 'Infra remote name')]
@@ -86,6 +89,9 @@ function sync(
         return;
     }
 
+    // read the lock before the checkout, to detect the one the sync is about to bring
+    $lockHashBefore = hashFile(TAPOMIX_CASTOR_LOCK_PATH);
+
     io()->text('Restoring frozen files...');
     if (!checkoutFiles($remote, $branch, $filesToSync)) {
         io()->error(\sprintf('Unable to restore the frozen files from "%s/%s".', $remote, $branch));
@@ -94,6 +100,8 @@ function sync(
     }
 
     io()->success('Frozen files updated.');
+
+    warnOnCastorLockChange($lockHashBefore);
 }
 
 /**
@@ -117,4 +125,36 @@ function checkoutFiles(string $remote, string $branch, array $files): bool
 function computeFilesToSync(array $frozen, array $excluded): array
 {
     return \array_values(\array_diff($frozen, $excluded));
+}
+
+/**
+ * Hash a file, or null when it is absent.
+ *
+ * Deliberately built on is_file() rather than fs(): the helper must stay usable without a booted
+ * castor container, and a directory is not a lock.
+ */
+function hashFile(string $path): ?string
+{
+    if (!\is_file($path)) {
+        return null;
+    }
+
+    return \md5_file($path) ?: null;
+}
+
+/**
+ * Warn when the sync brought a new castor lock, as castor will not act on it by itself.
+ *
+ * Castor reinstalls its own dependencies when the lock "content-hash" stops matching
+ * .castor/vendor/composer.installed, and that hash covers castor.composer.json alone. A template
+ * that locks a new version without touching the constraint leaves the castor vendor silently stale.
+ */
+function warnOnCastorLockChange(?string $hashBefore): void
+{
+    if ($hashBefore === hashFile(TAPOMIX_CASTOR_LOCK_PATH)) {
+        return;
+    }
+
+    // the "composer" alias belongs to tapomix-composer in a derived project, so qualify the command
+    io()->warning('The castor lock changed, run "castor castor:composer install" to update its vendor.');
 }
