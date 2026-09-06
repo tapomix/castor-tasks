@@ -96,6 +96,21 @@ castor infra:sync -r upstream -b develop
 4. Restores `.castor/git-frozen-sync.php` from the remote, unless the project excluded it
 5. Loads that frozen files list and computes the final list: frozen files minus excluded files
 6. Runs `git checkout <remote>/<branch> -- <files...>` to restore each frozen file
+7. Warns when the sync brought a new `.castor/castor.composer.lock`
+
+> [!IMPORTANT]
+> Castor reinstalls its own dependencies when the `content-hash` of `.castor/castor.composer.lock` stops
+> matching `.castor/vendor/composer.installed`, and that hash covers `castor.composer.json` alone. A
+> template that locks a new version without touching the constraint therefore leaves the castor vendor
+> silently stale — same tasks as before, despite the synced lock. When the sync brings a new lock, it
+> says so, and the install it asks for must be run:
+>
+> ```bash
+> castor castor:composer install
+> ```
+>
+> Qualify that command. In a derived project the `composer` alias resolves to `tapomix-composer:exec`,
+> which runs Composer in the application container against the application code, not on the castor vendor.
 
 ---
 
@@ -149,7 +164,10 @@ git remote set-url --push infra NO_PUSH
 # 2. Sync frozen files
 castor infra:sync
 
-# 3. Review and commit the updated files
+# 3. Update the castor vendor when the sync warns about a new lock
+castor castor:composer install
+
+# 4. Review and commit the updated files
 git diff
 git add .
 git commit -m "chore: sync frozen files from infra"
