@@ -211,6 +211,8 @@ castor symfony:install
 castor symfony:install --full
 castor console cache:clear
 castor console debug:router
+castor test
+castor test --coverage
 ```
 
 #### [Laravel](docs/laravel.md) (`tapomix-laravel`)

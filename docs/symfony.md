@@ -1,12 +1,12 @@
 # Symfony Tasks
 
-Symfony tasks for project installation and Console command execution in Docker containers.
+Symfony tasks for project installation, Console command execution and running the test suite in Docker containers.
 
 **Namespace:** `tapomix-symfony`
 
 ## Overview
 
-These tasks provide project bootstrapping and a convenient way to execute Symfony Console commands inside your Docker PHP container.
+These tasks provide project bootstrapping, a convenient way to execute Symfony Console commands, and a PHPUnit runner — all inside your Docker PHP container.
 
 The Console command is executed using `docker-compose exec` in the PHP service, so **the container must be started** to execute commands.
 
@@ -85,6 +85,59 @@ The task passes all arguments directly to Console inside the container:
 # becomes:
 docker compose (...options...) exec php php bin/console cache:clear
 ```
+
+---
+
+### `test` - Run PHPUnit Tests
+
+Run the PHPUnit test suite in the PHP Docker container.
+
+**Aliases:** `tapomix-symfony:test`, `test`
+
+**Availability:** Symfony projects only (`APP_FRAMEWORK=symfony`), dev environment only
+
+**Usage:**
+
+```bash
+# Run the whole suite
+castor test
+
+# Only run tests matching a pattern
+castor test --filter=SomeTest
+castor test -f testSomething
+
+# With a code coverage report
+castor test --coverage
+```
+
+**Options:**
+
+| Option | Shortcut | Default | Description |
+| ------ | -------- | ------- | ----------- |
+| `--filter` | `-f` | — | Only run tests whose name matches this pattern |
+| `--coverage` | — | `false` | Generate a coverage report (appends `--coverage-text`) |
+
+**How it works:**
+
+```bash
+# castor test
+# becomes:
+docker compose (...options...) exec php vendor/bin/phpunit
+
+# castor test --coverage
+# becomes:
+docker compose (...options...) exec -e XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text
+```
+
+`--coverage` sets `XDEBUG_MODE=coverage` for that run only, so it works even when the project
+keeps Xdebug in a lighter mode (`develop,debug`) for day-to-day speed. A coverage driver
+(Xdebug or PCOV) must be present in the container.
+
+A failing suite makes the task exit non-zero without raising a Castor error.
+
+**Requirements:**
+
+- `phpunit/phpunit` must be installed
 
 ---
 

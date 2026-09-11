@@ -146,8 +146,16 @@ function run(string $service, array $command, ?Context $context = null): Process
     return castor_run([...buildBaseDockerComposeCmd(), 'run', '--rm', $service, ...$command], context: $context);
 }
 
-/** @param string[] $command */
-function exec(string $service, array $command, ?Context $context = null): Process
+/**
+ * @param string[]              $command
+ * @param array<string, string> $env     extra variables, passed as `-e KEY=VALUE` to `docker compose exec`
+ */
+function exec(string $service, array $command, ?Context $context = null, array $env = []): Process
 {
-    return castor_run([...buildBaseDockerComposeCmd(), 'exec', $service, ...$command], context: $context);
+    $envArgs = [];
+    foreach ($env as $key => $value) {
+        $envArgs = [...$envArgs, '-e', \sprintf('%s=%s', $key, $value)];
+    }
+
+    return castor_run([...buildBaseDockerComposeCmd(), 'exec', ...$envArgs, $service, ...$command], context: $context);
 }

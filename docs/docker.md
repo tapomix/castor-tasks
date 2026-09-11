@@ -269,7 +269,7 @@ Execute a command in a running service using `docker-compose exec`.
 **Signature:**
 
 ```php
-function exec(string $service, array $command, ?Context $context = null): Process
+function exec(string $service, array $command, ?Context $context = null, array $env = []): Process
 ```
 
 **Parameters:**
@@ -277,6 +277,7 @@ function exec(string $service, array $command, ?Context $context = null): Proces
 - `$service` - Service name
 - `$command` - Command to execute (array of arguments)
 - `$context` - Optional Castor context
+- `$env` - Optional `['KEY' => 'value']` map, passed as `-e KEY=value` to `docker compose exec` (scoped to this call)
 
 **Returns:** `Process` - Symfony Process instance
 
@@ -290,6 +291,9 @@ function my_task(): void
 {
     // Execute command in running PHP service
     docker_exec('php', ['composer', 'install']);
+
+    // With an extra environment variable, scoped to this call
+    docker_exec('php', ['vendor/bin/phpunit', '--coverage-text'], env: ['XDEBUG_MODE' => 'coverage']);
 }
 ```
 
@@ -298,6 +302,10 @@ function my_task(): void
 ```bash
 docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
     exec php composer install
+
+# with env: ['XDEBUG_MODE' => 'coverage']
+docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
+    exec -e XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text
 ```
 
 ---
