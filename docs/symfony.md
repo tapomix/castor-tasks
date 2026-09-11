@@ -40,7 +40,7 @@ castor symfony:install --full --symfony-version='^7.2'
 
 | Option | Shortcut | Default | Description |
 | ------ | -------- | ------- | ----------- |
-| `--full` / `--no-full` | `-f` | `false` | Install full webapp metapackage |
+| `--full` | `-f` | `false` | Install full webapp metapackage |
 | `--symfony-version` | `-s` | `^8.0` | Symfony version constraint |
 
 **How it works:**

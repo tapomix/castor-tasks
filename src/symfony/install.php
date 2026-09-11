@@ -7,7 +7,6 @@ namespace Tapomix\Castor\Symfony;
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 use Castor\Helper\PathHelper;
-use Symfony\Component\Console\Input\InputOption;
 
 use function Castor\fs;
 use function Castor\io;
@@ -20,7 +19,7 @@ define('TAPOMIX_NAMESPACE_SYMFONY', 'tapomix-symfony');
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_SYMFONY, description: 'Install new Symfony project', aliases: ['symfony', 'symfony:install'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
 function install(
-    #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Install full webapp')]
+    #[AsOption(shortcut: 'f', description: 'Install full webapp')]
     bool $full = false,
     #[AsOption(shortcut: 's', description: 'Symfony version constraint')]
     string $symfonyVersion = '^8.0',

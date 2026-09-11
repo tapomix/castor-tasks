@@ -6,7 +6,6 @@ namespace Tapomix\Castor\Qa\Analyzer;
 
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Process;
 
 use function Castor\fs;
@@ -37,7 +36,7 @@ function lint(): ?Process
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run PHP-CS-Fixer', aliases: ['php-cs', 'cs'], enabled: EXPR_ENV_DEV)]
 function phpCsFixer(
-    #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Really fix issues')]
+    #[AsOption(shortcut: 'f', description: 'Really fix issues')]
     bool $fix = false,
 ): ?Process {
     $binary = 'vendor/bin/php-cs-fixer';
@@ -76,7 +75,7 @@ function phpstan(): ?Process
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Pint', aliases: ['pint'], enabled: EXPR_FRAMEWORK_LARAVEL . ' && ' . EXPR_ENV_DEV)]
 function pint(
-    #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Really fix issues')]
+    #[AsOption(shortcut: 'f', description: 'Really fix issues')]
     bool $fix = false,
 ): ?Process {
     $binary = 'vendor/bin/pint';
@@ -99,7 +98,7 @@ function pint(
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Rector', aliases: ['rector'], enabled: EXPR_ENV_DEV)]
 function rector(
-    #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Really fix issues')]
+    #[AsOption(shortcut: 'f', description: 'Really fix issues')]
     bool $fix = false,
 ): ?Process {
     $binary = 'vendor/bin/rector';
@@ -122,7 +121,7 @@ function rector(
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_QA, description: 'Run Twig-CS-Fixer', aliases: ['twig-cs'], enabled: EXPR_FRAMEWORK_SYMFONY . ' && ' . EXPR_ENV_DEV)]
 function twigCsFixer(
-    #[AsOption(shortcut: 'f', mode: InputOption::VALUE_NEGATABLE, description: 'Really fix issues')]
+    #[AsOption(shortcut: 'f', description: 'Really fix issues')]
     bool $fix = false,
 ): ?Process {
     $binary = 'vendor/bin/twig-cs-fixer';

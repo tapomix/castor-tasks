@@ -6,7 +6,6 @@ namespace Tapomix\Castor\Dns;
 
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
-use Symfony\Component\Console\Input\InputOption;
 use Tapomix\Castor\Enums\DNSSecAlgorithm;
 use Tapomix\Castor\Enums\DNSSecFlag;
 
@@ -71,8 +70,8 @@ function generate(
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DNS, description: 'List all DNSSEC keys for a zone', aliases: ['keys:list'])]
 function listing(
     string $zone,
-    #[AsOption(name: 'only-ksk', shortcut: 'k', mode: InputOption::VALUE_NONE, description: 'List only KSK keys')]
-    bool $onlyKsk,
+    #[AsOption(name: 'only-ksk', shortcut: 'k', description: 'List only KSK keys')]
+    bool $onlyKsk = false,
 ): void {
     if (!isValidZoneName($zone)) {
         throw new \InvalidArgumentException('Invalid zone name: ' . $zone);
