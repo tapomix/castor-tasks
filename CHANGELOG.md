@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.7] - 2026-09-11
+
+### Added
+
+- `symfony:test` task to run the PHPUnit suite in Docker, with `--filter` and `--coverage` options
+- `$env` parameter on `Docker\exec()` to pass extra `-e KEY=VALUE` variables to a single call
+- `symfony:install` now removes recipe files superseded by the project-level configuration
+
+### Changed
+
+- `infra:sync` now warns when the sync brings a new Castor dependency lock
+- Boolean options harmonized to a single non-negatable flag, dropping `--no-*` variants
+
+---
+
 ## [0.3.6] - 2026-09-02
 
 ### Fixed
