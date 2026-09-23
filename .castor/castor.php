@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tapomix\Dev;
 
+define('CASTOR_USE_CHDIR', true);
+
 use Castor\Attribute\AsContext;
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
