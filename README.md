@@ -262,11 +262,13 @@ castor pg:restore <timestamp>
 
 ### 🏗️ [Infra Tasks](docs/infra.md) (`tapomix-infra`)
 
-Synchronize frozen files from a shared infrastructure remote.
+Synchronize frozen files from a shared infrastructure remote, and check pinned versions against the latest releases.
 
 ```bash
 castor infra:sync
 castor infra:sync --remote=upstream --branch=develop
+castor infra:versions
+castor infra:versions --strict
 ```
 
 ### 🚀 [VPS Tasks](docs/vps.md) (`tapomix-vps`)

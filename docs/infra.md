@@ -1,6 +1,6 @@
 # Infra Tasks
 
-Infrastructure synchronization tasks for keeping "frozen files" up to date from a shared infra remote.
+Infrastructure tasks for keeping "frozen files" up to date from a shared infra remote, and for checking pinned versions against the latest releases.
 
 **Namespace:** `tapomix-infra`
 
@@ -111,6 +111,86 @@ castor infra:sync -r upstream -b develop
 >
 > Qualify that command. In a derived project the `composer` alias resolves to `tapomix-composer:exec`,
 > which runs Composer in the application container against the application code, not on the castor vendor.
+
+### `versions` - Check Pinned Versions
+
+Compare every pinned version with the latest release **of its branch** and with the latest release overall.
+Staying on PHP 8.4 is a choice; missing its latest patch is not.
+
+**Aliases:** `tapomix-infra:versions`, `infra:versions`
+
+**Usage:**
+
+```bash
+castor infra:versions
+
+# exit with an error when something calls for an action (cron, CI)
+castor infra:versions --strict
+castor infra:versions -s
+```
+
+**Options:**
+
+| Option | Shortcut | Default | Description |
+| ------ | -------- | ------- | ----------- |
+| `--strict` | `-s` | `false` | Exit with code 1 when an update is available in a branch, a branch is EOL or a lookup failed |
+
+**Output:**
+
+```txt
+ ------------ --------- -------- ------------------ --------- ------------ ------------------
+  Component    Current   Branch   Latest in branch   Latest    Branch EOL   Status
+ ------------ --------- -------- ------------------ --------- ------------ ------------------
+  PHP          8.4.25    8.4      8.4.25             8.5.10    2028-12-31   up to date
+  PostgreSQL   18.6      18       18.6               18.6      2030-11-14   up to date
+  Symfony      8.1.7     8.1      8.1.7              8.1.7     2027-01-31   up to date
+  Tailwind     v4.3.3    4.3      v4.3.3             v4.3.3    —            up to date
+  daisyUI      5.7.28    5.7      v5.7.44            v5.7.44   —            update available
+ ------------ --------- -------- ------------------ --------- ------------ ------------------
+```
+
+`Latest` is highlighted when it belongs to a newer branch than the current one. `Branch EOL` is highlighted
+once the date is past, or less than 90 days away.
+
+**Tracked components:**
+
+| Component | Current version | Branch | Latest version source |
+| --------- | --------------- | ------ | --------------------- |
+| PHP | `PHP_VERSION` | `8.4` | [endoflife.date](https://endoflife.date/php), then the `dunglas/frankenphp:php<version>` tag on Docker Hub |
+| PostgreSQL | `PG_VERSION` | `18` | [endoflife.date](https://endoflife.date/postgresql), then the `postgres:<version>-alpine` tag on Docker Hub |
+| Symfony | `symfony/framework-bundle` in `<APP.CODE_PATH>/composer.lock` | `8.1` | [endoflife.date](https://endoflife.date/symfony) |
+| Laravel | `laravel/framework` in `<APP.CODE_PATH>/composer.lock` | `12` | [endoflife.date](https://endoflife.date/laravel) |
+| Tailwind | `TAILWIND_VERSION` | `4.3` | GitHub releases of `tailwindlabs/tailwindcss` |
+| daisyUI | `var version` in `<APP.CODE_PATH>/assets/styles/daisyui.mjs` | `5.7` | GitHub releases of `saadeghi/daisyui` |
+
+A component whose current version cannot be read is not shown: a project without daisyUI simply gets no daisyUI
+row, and a Symfony project gets no Laravel row.
+
+> [!TIP]
+> For the frameworks, `composer update --dry-run` already shows the patches of the branch. What it cannot show is
+> the branch EOL — Symfony minors are only maintained for 8 months — nor the next minor, held back by
+> `extra.symfony.require`.
+
+**How the current version is read:**
+
+1. The `${XXX_VERSION:-default}` defaults are collected from `compose.yaml`, `compose.app.yaml` and
+   `compose.override.yaml`, in that order: a later file overrides an earlier one, as in compose
+2. A non-empty value in the app env file (`TAPOMIX_APP_ENV_FILE`, default `.env.docker`) overrides the pin
+
+**Statuses:**
+
+| Status | Meaning | Fails `--strict` |
+| ------ | ------- | ---------------- |
+| `up to date` | The latest release of the branch is pinned | no |
+| `update available` | A newer release exists in the branch | yes |
+| `update pending (no image yet)` | A newer release exists, but its Docker image is not published yet | no |
+| `EOL soon` | Up to date, but the branch reaches its end of life in less than 90 days | no |
+| `branch EOL` | The branch reached its end of life | yes |
+| `lookup failed` | The latest version could not be fetched | yes |
+
+> [!NOTE]
+> Unauthenticated GitHub API calls are limited to 60 per hour and per IP. Export `GITHUB_TOKEN` to lift the
+> limit if the task runs often from a shared IP.
 
 ---
 
