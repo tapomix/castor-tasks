@@ -68,6 +68,9 @@ Or you can add this to your existing `castor.php` file:
 // .castor/castor.php
 <?php
 
+// Guard against redefinition when this file is imported/mounted by another castor.php
+defined('CASTOR_USE_CHDIR') || define('CASTOR_USE_CHDIR', true);
+
 use Castor\Helper\PathHelper;
 
 use function Castor\import;
