@@ -7,6 +7,7 @@ namespace Tapomix\Castor\Infra;
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 use Castor\Helper\PathHelper;
+use Symfony\Component\Console\Command\Command;
 
 use function Castor\context;
 use function Castor\fs;
@@ -40,26 +41,9 @@ function sync(
         return;
     }
 
-    /** @var string[] $excludedFiles */
-    $excludedFiles = fs()->exists(TAPOMIX_FROZEN_FILES_EXCLUDE_PATH) ? require TAPOMIX_FROZEN_FILES_EXCLUDE_PATH : [];
+    $excludedFiles = readExcludedFiles();
 
-    // check that the remote exists
-    $process = run(['git', 'remote'], context()->withQuiet());
-    $remotes = \array_filter(\explode("\n", \trim($process->getOutput())));
-    if (!\in_array($remote, $remotes, true)) {
-        io()->error(\sprintf(
-            'Remote "%s" not found. Add it with: git remote add %s <url>',
-            $remote,
-            $remote,
-        ));
-
-        return;
-    }
-
-    io()->text(\sprintf('Fetching from remote "%s"...', $remote));
-    if (!run(['git', 'fetch', $remote])->isSuccessful()) {
-        io()->error(\sprintf('Unable to fetch from remote "%s".', $remote));
-
+    if (!fetchRemote($remote)) {
         return;
     }
 
@@ -102,6 +86,119 @@ function sync(
     io()->success('Frozen files updated.');
 
     warnOnCastorLockChange($lockHashBefore);
+}
+
+#[AsTask(namespace: TAPOMIX_NAMESPACE_INFRA, description: 'Show the frozen files that differ from the infra remote', aliases: ['infra:status'])]
+function status(
+    #[AsOption(shortcut: 'r', description: 'Infra remote name')]
+    string $remote = 'infra',
+    #[AsOption(shortcut: 'b', description: 'Branch to compare with')]
+    string $branch = 'main',
+    #[AsOption(shortcut: 's', description: 'Exit with an error when a frozen file differs')]
+    bool $strict = false,
+): int {
+    $ref = \sprintf('%s/%s', $remote, $branch);
+
+    io()->title(\sprintf('Comparing frozen files with "%s"', $ref));
+
+    $excludedFiles = readExcludedFiles();
+
+    if (!fetchRemote($remote)) {
+        return Command::FAILURE;
+    }
+
+    // the remote list is the one a sync would apply, so a file the template just added is reported too
+    $frozenFiles = \in_array(TAPOMIX_FROZEN_FILES_SYNC_NAME, $excludedFiles, true) ? null : readRemoteFrozenFiles($ref);
+
+    if (null === $frozenFiles) {
+        if (!fs()->exists(TAPOMIX_FROZEN_FILES_SYNC_PATH)) {
+            io()->error(\sprintf('Frozen files list not found on "%s" nor at "%s".', $ref, TAPOMIX_FROZEN_FILES_SYNC_PATH));
+
+            return Command::FAILURE;
+        }
+
+        /** @var string[] $frozenFiles */
+        $frozenFiles = require TAPOMIX_FROZEN_FILES_SYNC_PATH;
+    }
+
+    $filesToCompare = computeFilesToSync($frozenFiles, $excludedFiles);
+
+    if ([] === $filesToCompare) {
+        io()->warning('No files to compare after applying exclusions.');
+
+        return Command::SUCCESS;
+    }
+
+    // Compared with the working tree, as a sync would overwrite it. Files the project added under a
+    // frozen directory are left out (the sync never touches them), and so are renames, split into
+    // the missing file and the added one.
+    $process = run(
+        ['git', 'diff', '--no-renames', '--name-status', '--diff-filter=DMT', $ref, '--', ...$filesToCompare],
+        context()->withQuiet(),
+    );
+
+    if (!$process->isSuccessful()) {
+        io()->error(\sprintf('Unable to compare the frozen files with "%s".', $ref));
+
+        return Command::FAILURE;
+    }
+
+    $differences = parseFrozenDiff($process->getOutput());
+
+    if ([] === $differences) {
+        io()->success(\sprintf('Frozen files are up to date with "%s".', $ref));
+
+        return Command::SUCCESS;
+    }
+
+    io()->table(['File', 'State'], \array_map(null, \array_keys($differences), \array_values($differences)));
+    io()->warning(\sprintf(
+        '%d frozen file(s) differ from "%s", run "castor infra:sync --remote=%s --branch=%s" to update them.',
+        \count($differences),
+        $ref,
+        $remote,
+        $branch,
+    ));
+
+    return $strict ? Command::FAILURE : Command::SUCCESS;
+}
+
+/**
+ * Files the derived project opted out of the sync.
+ *
+ * @return string[]
+ */
+function readExcludedFiles(): array
+{
+    /** @var string[] $excludedFiles */
+    $excludedFiles = fs()->exists(TAPOMIX_FROZEN_FILES_EXCLUDE_PATH) ? require TAPOMIX_FROZEN_FILES_EXCLUDE_PATH : [];
+
+    return $excludedFiles;
+}
+
+/** Check that the remote exists then fetch it, reporting the failure. */
+function fetchRemote(string $remote): bool
+{
+    $process = run(['git', 'remote'], context()->withQuiet());
+    $remotes = \array_filter(\explode("\n", \trim($process->getOutput())));
+    if (!\in_array($remote, $remotes, true)) {
+        io()->error(\sprintf(
+            'Remote "%s" not found. Add it with: git remote add %s <url>',
+            $remote,
+            $remote,
+        ));
+
+        return false;
+    }
+
+    io()->text(\sprintf('Fetching from remote "%s"...', $remote));
+    if (!run(['git', 'fetch', $remote])->isSuccessful()) {
+        io()->error(\sprintf('Unable to fetch from remote "%s".', $remote));
+
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -157,4 +254,54 @@ function warnOnCastorLockChange(?string $hashBefore): void
 
     // the "composer" alias belongs to tapomix-composer in a derived project, so qualify the command
     io()->warning('The castor lock changed, run "castor castor:composer install" to update its vendor.');
+}
+
+/**
+ * Frozen files list as committed on the remote, or null when it has none.
+ *
+ * @return ?string[]
+ */
+function readRemoteFrozenFiles(string $ref): ?array
+{
+    $process = run(['git', 'show', \sprintf('%s:%s', $ref, TAPOMIX_FROZEN_FILES_SYNC_NAME)], context()->withQuiet());
+    if (!$process->isSuccessful()) {
+        io()->warning(\sprintf('No frozen files list on "%s", falling back to the local one.', $ref));
+
+        return null;
+    }
+
+    // the list is a PHP file: evaluate it from a temporary copy, as a sync would after restoring it
+    $path = fs()->tempnam(\sys_get_temp_dir(), 'tapomix-frozen-');
+
+    try {
+        fs()->dumpFile($path, $process->getOutput());
+
+        /** @var string[] $frozenFiles */
+        $frozenFiles = require $path;
+    } finally {
+        fs()->remove($path);
+    }
+
+    return $frozenFiles;
+}
+
+/**
+ * Map each file of a `git diff --name-status <ref>` output to its state against the ref.
+ *
+ * @return array<string, string>
+ */
+function parseFrozenDiff(string $output): array
+{
+    $differences = [];
+
+    foreach (\array_filter(\explode("\n", \trim($output))) as $line) {
+        [$code, $file] = \explode("\t", $line, 2) + [1 => ''];
+
+        $differences[$file] = match ($code[0]) {
+            'D' => 'missing locally',
+            default => 'differs',
+        };
+    }
+
+    return $differences;
 }

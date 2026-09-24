@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Tapomix\Castor\Infra\computeFilesToSync;
 use function Tapomix\Castor\Infra\hashFile;
+use function Tapomix\Castor\Infra\parseFrozenDiff;
 
 class SyncTest extends TestCase
 {
@@ -142,5 +143,22 @@ class SyncTest extends TestCase
         file_put_contents($path, $content);
 
         return $path;
+    }
+
+    public function testParseFrozenDiffMapsEachFileToItsState(): void
+    {
+        $output = "M\tcompose.yaml\nD\t.claude/rules/new-rule.md\nT\t.editorconfig\n";
+
+        $this->assertSame([
+            'compose.yaml' => 'differs',
+            '.claude/rules/new-rule.md' => 'missing locally',
+            '.editorconfig' => 'differs',
+        ], parseFrozenDiff($output));
+    }
+
+    public function testParseFrozenDiffReturnsEmptyArrayWithoutDifferences(): void
+    {
+        $this->assertSame([], parseFrozenDiff(''));
+        $this->assertSame([], parseFrozenDiff("\n"));
     }
 }
