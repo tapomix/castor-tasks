@@ -112,6 +112,57 @@ castor infra:sync -r upstream -b develop
 > Qualify that command. In a derived project the `composer` alias resolves to `tapomix-composer:exec`,
 > which runs Composer in the application container against the application code, not on the castor vendor.
 
+### `status` - Compare Frozen Files with Infra Remote
+
+Show the frozen files a sync would change, without touching anything.
+
+**Aliases:** `tapomix-infra:status`, `infra:status`
+
+**Usage:**
+
+```bash
+# Compare with the default remote "infra" and branch "main"
+castor infra:status
+
+# Compare with another remote, e.g. a local clone of the template
+castor infra:status --remote=infra-local
+castor infra:status -r infra-local -b develop
+
+# exit with an error when a frozen file differs (cron, CI)
+castor infra:status --strict
+```
+
+**Options:**
+
+| Option | Shortcut | Default | Description |
+| ------ | -------- | ------- | ----------- |
+| `--remote` | `-r` | `infra` | Git remote name to compare with |
+| `--branch` | `-b` | `main` | Branch to compare with |
+| `--strict` | `-s` | `false` | Exit with code 1 when a frozen file differs |
+
+**Output:**
+
+```txt
+ --------------- -----------------
+  File            State
+ --------------- -----------------
+  .editorconfig   missing locally
+  compose.yaml    differs
+ --------------- -----------------
+```
+
+**How it works:**
+
+1. Loads the exclusion list and fetches the remote, as `infra:sync` does
+2. Reads `.castor/git-frozen-sync.php` **from the remote branch** (`git show`), unless the project excluded it,
+   so a file the template just added to the list is reported too; falls back to the local list otherwise
+3. Runs `git diff <remote>/<branch> -- <files...>` against the working tree, keeping only the files present on
+   the remote: a file the project added under a frozen directory is never touched by a sync, so never reported
+
+> [!NOTE]
+> Only what is **committed** on the remote branch is compared: work in progress in the template is ignored.
+> Local changes to a frozen file, committed or not, are reported as `differs`, since a sync would overwrite them.
+
 ### `versions` - Check Pinned Versions
 
 Compare every pinned version with the latest release **of its branch** and with the latest release overall.
@@ -243,7 +294,8 @@ return [
 git remote add infra https://git.example.com/infra/template.git
 git remote set-url --push infra NO_PUSH
 
-# 2. Sync frozen files
+# 2. Check what a sync would change, then sync frozen files
+castor infra:status
 castor infra:sync
 
 # 3. Update the castor vendor when the sync warns about a new lock
@@ -265,4 +317,5 @@ git commit -m "chore: sync frozen files from infra"
 | `No files to sync after applying exclusions` | All frozen files are excluded | Review `.castor/git-frozen-exclude.php` |
 | `Remote "infra" not found` | The Git remote is not configured | Run `git remote add infra <url>` |
 | `Unable to fetch from remote "infra"` | The remote is unreachable or the URL is wrong | Check the remote URL and your network access |
+| `Unable to compare the frozen files` | The branch does not exist on the remote | Check the `--branch` option |
 | `Unable to restore the frozen files` | A path in the frozen list does not exist on the remote branch | Fix the list on the infra remote, or opt out via `.castor/git-frozen-exclude.php` |
