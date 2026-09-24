@@ -68,6 +68,13 @@ function versionComponents(): array
             'endoflife' => 'laravel',
         ],
         [
+            'label' => 'Alpine.js',
+            'depth' => 2,
+            'file' => $codePath . '/importmap.php',
+            'pattern' => importmapVersionPattern('alpinejs'),
+            'github' => 'alpinejs/alpine',
+        ],
+        [
             'label' => 'Tailwind',
             'depth' => 2,
             'var' => 'TAILWIND_VERSION',
@@ -219,6 +226,12 @@ function readCurrentVersion(array $component, array $pinned, string $root): ?str
     }
 
     return null;
+}
+
+/** Pattern capturing the version pinned for a package in a Symfony AssetMapper importmap, whatever the order of its keys. */
+function importmapVersionPattern(string $package): string
+{
+    return \sprintf("/'%s'\\s*=>\\s*\\[[^\\]]*'version'\\s*=>\\s*'([^']+)'/", \preg_quote($package, '/'));
 }
 
 /** Installed version of a package in a composer lock, without its tag prefix. */

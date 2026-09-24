@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Tapomix\Castor\Infra\branchOf;
 use function Tapomix\Castor\Infra\eolState;
+use function Tapomix\Castor\Infra\importmapVersionPattern;
 use function Tapomix\Castor\Infra\isNewerVersion;
 use function Tapomix\Castor\Infra\latestVersion;
 use function Tapomix\Castor\Infra\parseComposeVersionDefaults;
@@ -172,6 +173,32 @@ class VersionsTest extends TestCase
 
         $this->assertSame('12.28.1', readCurrentVersion(['file' => 'composer.lock', 'package' => 'laravel/framework'], [], $this->tempDir));
         $this->assertNull(readCurrentVersion(['file' => 'missing.lock', 'package' => 'laravel/framework'], [], $this->tempDir));
+    }
+
+    public function testReadCurrentVersionFromImportmap(): void
+    {
+        $this->tempDir = sys_get_temp_dir() . '/versions-test-' . uniqid();
+        mkdir($this->tempDir);
+
+        file_put_contents($this->tempDir . '/importmap.php', <<<'PHP'
+            <?php
+            return [
+                'alpinejs-extra' => [
+                    'version' => '9.9.9',
+                ],
+                'alpinejs' => [
+                    'type' => 'js',
+                    'version' => '3.15.9',
+                ],
+            ];
+            PHP);
+
+        $alpine = ['file' => 'importmap.php', 'pattern' => importmapVersionPattern('alpinejs')];
+
+        $this->assertSame('3.15.9', readCurrentVersion($alpine, [], $this->tempDir));
+
+        file_put_contents($this->tempDir . '/importmap.php', "<?php\nreturn ['chart.js' => ['version' => '4.5.1']];\n");
+        $this->assertNull(readCurrentVersion($alpine, [], $this->tempDir));
     }
 
     public function testEolState(): void
