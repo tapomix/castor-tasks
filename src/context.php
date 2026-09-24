@@ -48,6 +48,8 @@ function default_context(): Context
 
         'CASTOR.DEFAULT_BROWSER' => $_SERVER['CASTOR_DEFAULT_BROWSER'] ?? 'firefox-developer-edition',
 
+        'INFRA.REMOTE' => $_SERVER['INFRA_REMOTE'] ?? 'infra',
+
         'DOCKER.ENV_FILE' => TAPOMIX_APP_ENV_FILE, // ! constant !
         'DOCKER.SERVICES.DB' => $_SERVER['APP_SERVICE_DB'] ?? 'db',
         'DOCKER.SERVICES.NODE' => $_SERVER['APP_SERVICE_NODE'] ?? 'node',

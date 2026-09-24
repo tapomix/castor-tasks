@@ -13,6 +13,7 @@ use function Castor\context;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\run;
+use function Castor\variable;
 
 define('TAPOMIX_NAMESPACE_INFRA', 'tapomix-infra');
 
@@ -28,11 +29,13 @@ define('TAPOMIX_CASTOR_LOCK_PATH', PathHelper::getRoot() . '/.castor/castor.comp
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_INFRA, description: 'Sync frozen files from the infra remote', aliases: ['infra:sync'])]
 function sync(
-    #[AsOption(shortcut: 'r', description: 'Infra remote name')]
-    string $remote = 'infra',
+    #[AsOption(shortcut: 'r', description: 'Infra remote name (default: INFRA.REMOTE)')]
+    ?string $remote = null,
     #[AsOption(shortcut: 'b', description: 'Branch to sync from')]
     string $branch = 'main',
 ): void {
+    $remote ??= defaultRemote();
+
     io()->title(\sprintf('Syncing frozen files from remote "%s"', $remote));
 
     if (!fs()->exists(TAPOMIX_FROZEN_FILES_SYNC_PATH)) {
@@ -90,13 +93,14 @@ function sync(
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_INFRA, description: 'Show the frozen files that differ from the infra remote', aliases: ['infra:status'])]
 function status(
-    #[AsOption(shortcut: 'r', description: 'Infra remote name')]
-    string $remote = 'infra',
+    #[AsOption(shortcut: 'r', description: 'Infra remote name (default: INFRA.REMOTE)')]
+    ?string $remote = null,
     #[AsOption(shortcut: 'b', description: 'Branch to compare with')]
     string $branch = 'main',
     #[AsOption(shortcut: 's', description: 'Exit with an error when a frozen file differs')]
     bool $strict = false,
 ): int {
+    $remote ??= defaultRemote();
     $ref = \sprintf('%s/%s', $remote, $branch);
 
     io()->title(\sprintf('Comparing frozen files with "%s"', $ref));
@@ -161,6 +165,16 @@ function status(
     ));
 
     return $strict ? Command::FAILURE : Command::SUCCESS;
+}
+
+/**
+ * Remote configured by the project, e.g. a local clone of the template not pushed yet.
+ *
+ * The fallback covers an app context that overrides the tapomix one without defining this key.
+ */
+function defaultRemote(): string
+{
+    return (string) variable('INFRA.REMOTE', 'infra');
 }
 
 /**
