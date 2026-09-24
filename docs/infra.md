@@ -66,7 +66,7 @@ Fetch frozen files from the infra remote and restore them via `git checkout`.
 **Usage:**
 
 ```bash
-# Sync using default remote "infra" and branch "main"
+# Sync using the default remote (INFRA_REMOTE, "infra" if unset) and branch "main"
 castor infra:sync
 
 # Sync from a specific remote
@@ -85,7 +85,7 @@ castor infra:sync -r upstream -b develop
 
 | Option | Shortcut | Default | Description |
 | ------ | -------- | ------- | ----------- |
-| `--remote` | `-r` | `infra` | Git remote name to sync from |
+| `--remote` | `-r` | `INFRA_REMOTE` | Git remote name to sync from |
 | `--branch` | `-b` | `main` | Branch to sync from |
 
 **How it works:**
@@ -121,7 +121,7 @@ Show the frozen files a sync would change, without touching anything.
 **Usage:**
 
 ```bash
-# Compare with the default remote "infra" and branch "main"
+# Compare with the default remote (INFRA_REMOTE, "infra" if unset) and branch "main"
 castor infra:status
 
 # Compare with another remote, e.g. a local clone of the template
@@ -136,7 +136,7 @@ castor infra:status --strict
 
 | Option | Shortcut | Default | Description |
 | ------ | -------- | ------- | ----------- |
-| `--remote` | `-r` | `infra` | Git remote name to compare with |
+| `--remote` | `-r` | `INFRA_REMOTE` | Git remote name to compare with |
 | `--branch` | `-b` | `main` | Branch to compare with |
 | `--strict` | `-s` | `false` | Exit with code 1 when a frozen file differs |
 
@@ -260,6 +260,21 @@ To prevent accidental pushes to the infra remote:
 ```bash
 git remote set-url --push infra NO_PUSH
 ```
+
+Both `infra:sync` and `infra:status` use the `infra` remote by default. To use another one without passing
+`--remote` each time, e.g. a local clone of the template whose latest commits are not pushed yet, set it in
+`.castor/.env.castor` (owned by the project, never synced):
+
+```bash
+git remote add infra-local /path/to/template
+```
+
+```dotenv
+# .castor/.env.castor
+INFRA_REMOTE=infra-local
+```
+
+The `--remote` option still takes precedence.
 
 ### 2. Create the frozen files list
 

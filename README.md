@@ -143,6 +143,7 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 | `APP_SERVICE_NODE` | `node` | Node service name in docker-compose |
 | `APP_SERVICE_PHP` | `php` | PHP service name in docker-compose |
 | `CASTOR_DEFAULT_BROWSER` | `firefox` | Default browser executable |
+| `INFRA_REMOTE` | `infra` | Git remote used by `infra:sync` and `infra:status` |
 
 ### Environment File Loading Order
 
