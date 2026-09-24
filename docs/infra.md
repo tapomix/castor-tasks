@@ -144,6 +144,7 @@ castor infra:versions -s
   PHP          8.4.25    8.4      8.4.25             8.5.10    2028-12-31   up to date
   PostgreSQL   18.6      18       18.6               18.6      2030-11-14   up to date
   Symfony      8.1.7     8.1      8.1.7              8.1.7     2027-01-31   up to date
+  Alpine.js    3.15.9    3.15     v3.15.12           v3.17.4   —            update available
   Tailwind     v4.3.3    4.3      v4.3.3             v4.3.3    —            up to date
   daisyUI      5.7.28    5.7      v5.7.44            v5.7.44   —            update available
  ------------ --------- -------- ------------------ --------- ------------ ------------------
@@ -160,6 +161,7 @@ once the date is past, or less than 90 days away.
 | PostgreSQL | `PG_VERSION` | `18` | [endoflife.date](https://endoflife.date/postgresql), then the `postgres:<version>-alpine` tag on Docker Hub |
 | Symfony | `symfony/framework-bundle` in `<APP.CODE_PATH>/composer.lock` | `8.1` | [endoflife.date](https://endoflife.date/symfony) |
 | Laravel | `laravel/framework` in `<APP.CODE_PATH>/composer.lock` | `12` | [endoflife.date](https://endoflife.date/laravel) |
+| Alpine.js | `alpinejs` entry in `<APP.CODE_PATH>/importmap.php` | `3.15` | GitHub releases of `alpinejs/alpine` |
 | Tailwind | `TAILWIND_VERSION` | `4.3` | GitHub releases of `tailwindlabs/tailwindcss` |
 | daisyUI | `var version` in `<APP.CODE_PATH>/assets/styles/daisyui.mjs` | `5.7` | GitHub releases of `saadeghi/daisyui` |
 
