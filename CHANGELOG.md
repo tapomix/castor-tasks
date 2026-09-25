@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.8] - 2026-09-25
+
+### Added
+
+- `infra:versions` task to check pinned versions against the latest releases
+- `infra:status` task to list frozen files differing from the infra remote
+- `INFRA_REMOTE` variable to set the default infra remote
+
+### Changed
+
+- `infra:sync` no longer prints the `git fetch` output
+- Updated Composer dependencies
+
+### Fixed
+
+- Castor 1.8 deprecation: define `CASTOR_USE_CHDIR` (see README)
+
+---
+
 ## [0.3.7] - 2026-09-11
 
 ### Added
