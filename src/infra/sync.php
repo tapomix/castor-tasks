@@ -206,7 +206,7 @@ function fetchRemote(string $remote): bool
     }
 
     io()->text(\sprintf('Fetching from remote "%s"...', $remote));
-    if (!run(['git', 'fetch', $remote])->isSuccessful()) {
+    if (!run(['git', 'fetch', '--quiet', $remote])->isSuccessful()) {
         io()->error(\sprintf('Unable to fetch from remote "%s".', $remote));
 
         return false;
