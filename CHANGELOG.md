@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.9] - 2026-10-20
+
+### Changed
+
+- `symfony:install` aligns `require.php` with the container PHP version (major.minor)
+- Updated Composer dependencies
+
+---
+
 ## [0.3.8] - 2026-09-25
 
 ### Added
