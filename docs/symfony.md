@@ -51,6 +51,7 @@ castor symfony:install --full --symfony-version='^7.2'
    - Disables Docker recipe integration (project manages its own Docker infrastructure)
    - Restricts to official recipes only (prevents interactive prompts for contrib recipes)
    - Allows the PHPStan extension-installer plugin
+   - Aligns `require.php` with the PHP running in the container (`>=8.5` on PHP 8.5.x), instead of the skeleton's Symfony minimum
 4. If `--full`: runs `composer require webapp`
 5. Installs dev dependencies (PHPStan, Rector, PHP-CS-Fixer, Twig-CS-Fixer, Maker Bundle, etc.)
 6. Removes the recipe files superseded by the project-level configuration: `.editorconfig` (its `root = true` would shadow the project one), `AGENTS.md` and `CLAUDE.md`
