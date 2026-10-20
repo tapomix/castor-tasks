@@ -14,6 +14,7 @@ use function Castor\variable;
 use function Tapomix\Castor\Composer\exec as composer_exec;
 use function Tapomix\Castor\Composer\execDev as composer_dev;
 use function Tapomix\Castor\Docker\exec as docker_exec;
+use function Tapomix\Castor\Docker\getContainerPhpVersion;
 
 define('TAPOMIX_NAMESPACE_SYMFONY', 'tapomix-symfony');
 
@@ -49,6 +50,8 @@ function install(
     composer_exec(['config', '--json', 'extra.symfony.allow-contrib', 'false']);
     // allow phpstan extension-installer plugin (required before requiring it non-interactively)
     composer_exec(['config', '--json', 'allow-plugins.phpstan/extension-installer', 'true']);
+    // the skeleton declares Symfony's minimum PHP: align it with the container's (major.minor only)
+    composer_exec(['require', '--no-interaction', \sprintf('php:>=%s', getContainerPhpVersion($servicePHP))]);
 
     if ($full) {
         composer_exec(['require', '--no-interaction', 'webapp']);
