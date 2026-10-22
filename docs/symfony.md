@@ -134,6 +134,9 @@ docker compose (...options...) exec -e XDEBUG_MODE=coverage php vendor/bin/phpun
 keeps Xdebug in a lighter mode (`develop,debug`) for day-to-day speed. A coverage driver
 (Xdebug or PCOV) must be present in the container.
 
+The task exits with PHPUnit's exit code, so a failing or crashing suite can be caught by a CI,
+a git hook or `castor test && ...`.
+
 A failing suite makes the task exit non-zero without raising a Castor error.
 
 **Requirements:**
