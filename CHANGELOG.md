@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.1] - 2026-10-23
+
+### Changed
+
+- **Breaking:** PHP 8.4 is now required, like Castor itself since 1.6
+- Updated Composer dependencies (Castor 1.9, PHPUnit 13)
+
+---
+
 ## [0.4.0] - 2026-10-23
 
 ### Added
