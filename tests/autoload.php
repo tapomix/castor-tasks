@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 $srcDir = __DIR__ . '/../src';
 
+// Castor resolves its directories when the application boots: outside of it (PHPUnit, PHPStan),
+// some src/ files call PathHelper::getRoot() as soon as they are loaded
+$rootDir = dirname(__DIR__);
+Castor\Helper\PathHelper::initialize($rootDir, $rootDir . '/.castor/vendor', $rootDir);
+
 // Files to exclude from autoloading
 $excludedFiles = [
     'context.php', // already loaded via main autoload
