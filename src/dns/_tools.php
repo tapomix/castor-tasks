@@ -41,7 +41,7 @@ function dns_run(array $command = [], string $workdir = '/data', string $service
             $service,
             ...$command,
         ],
-        context: context()->withQuiet(true),
+        context: context()->withQuiet(true)->withAllowFailure(), // callers check isSuccessful() and report the error
     );
 }
 

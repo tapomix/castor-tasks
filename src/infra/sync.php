@@ -138,7 +138,7 @@ function status(
     // the missing file and the added one.
     $process = run(
         ['git', 'diff', '--no-renames', '--name-status', '--diff-filter=DMT', $ref, '--', ...$filesToCompare],
-        context()->withQuiet(),
+        context()->withQuiet()->withAllowFailure(),
     );
 
     if (!$process->isSuccessful()) {
@@ -206,7 +206,7 @@ function fetchRemote(string $remote): bool
     }
 
     io()->text(\sprintf('Fetching from remote "%s"...', $remote));
-    if (!run(['git', 'fetch', '--quiet', $remote])->isSuccessful()) {
+    if (!run(['git', 'fetch', '--quiet', $remote], context()->withAllowFailure())->isSuccessful()) {
         io()->error(\sprintf('Unable to fetch from remote "%s".', $remote));
 
         return false;
@@ -222,7 +222,7 @@ function fetchRemote(string $remote): bool
  */
 function checkoutFiles(string $remote, string $branch, array $files): bool
 {
-    return run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$files])->isSuccessful();
+    return run(['git', 'checkout', \sprintf('%s/%s', $remote, $branch), '--', ...$files], context()->withAllowFailure())->isSuccessful();
 }
 
 /**
@@ -277,7 +277,8 @@ function warnOnCastorLockChange(?string $hashBefore): void
  */
 function readRemoteFrozenFiles(string $ref): ?array
 {
-    $process = run(['git', 'show', \sprintf('%s:%s', $ref, TAPOMIX_FROZEN_FILES_SYNC_NAME)], context()->withQuiet());
+    // a remote without a frozen files list is expected: fall back to the local one
+    $process = run(['git', 'show', \sprintf('%s:%s', $ref, TAPOMIX_FROZEN_FILES_SYNC_NAME)], context()->withQuiet()->withAllowFailure());
     if (!$process->isSuccessful()) {
         io()->warning(\sprintf('No frozen files list on "%s", falling back to the local one.', $ref));
 

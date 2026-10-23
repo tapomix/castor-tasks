@@ -66,7 +66,6 @@ function default_context(): Context
     return new Context(
         data: $data,
         tty: hasControllingTty(),
-        allowFailure: true,
     );
 }
 
