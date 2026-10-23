@@ -12,6 +12,9 @@ All QA commands are executed using `docker-compose exec` in the PHP service, so 
 
 **Important:** Tasks automatically skip with a warning if the required binary is not found in your project.
 
+Each task exits with its tool's exit code (a skipped tool exits `0`), so a failing analysis can be caught by a CI,
+a git hook or `castor cs && ...`.
+
 ## Available Tasks
 
 ### `qa` - Run All QA Analyzers
@@ -37,6 +40,9 @@ castor qa --parallel
 
 The task automatically detects all available QA tools in your project and runs them one by one (or in parallel if `--parallel` is specified).  
 Only tools with binaries present are executed.
+
+A failing analyzer does not stop the others: every report is shown, and the task exits with the highest
+exit code returned by the analyzers.
 
 ---
 
