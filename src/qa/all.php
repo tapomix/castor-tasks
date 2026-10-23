@@ -61,6 +61,7 @@ function all(bool $parallel = false): int
         return 0;
     }
 
+    // the worst exit code wins, so a single failing analyzer fails the whole run
     return \max(
         \array_map(
             fn (Process $process): int => $process->getExitCode() ?? 0,
@@ -71,7 +72,8 @@ function all(bool $parallel = false): int
 
 function runCastorCommand(string $command): Process
 {
-    return run(['castor', $command]);
+    // a failing analyzer must not stop the others: every report is shown
+    return run(['castor', $command], context: context()->withAllowFailure());
 }
 
 /** @return Command[] */
