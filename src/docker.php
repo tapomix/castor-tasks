@@ -21,7 +21,7 @@ use function Castor\variable;
 define('TAPOMIX_NAMESPACE_DOCKER', 'tapomix-docker');
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Build all services', aliases: ['build'])]
-function build(bool $noCache = false): void
+function build(bool $noCache = false, bool $noPull = false): void
 {
     io()->title('Building server');
 
@@ -31,6 +31,11 @@ function build(bool $noCache = false): void
     $cmd[] = 'build';
     if ($noCache) {
         $cmd[] = '--no-cache';
+    }
+
+    // pull by default: a cached base image is never refreshed otherwise, even when its tag was republished
+    if (!$noPull) {
+        $cmd[] = '--pull';
     }
 
     castor_run($cmd, context: $context);

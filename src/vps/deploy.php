@@ -12,6 +12,7 @@ use function Castor\io;
 use function Castor\run;
 use function Castor\variable;
 use function Tapomix\Castor\Docker\build as docker_build;
+use function Tapomix\Castor\Docker\pull as docker_pull;
 use function Tapomix\Castor\Docker\start as docker_start;
 use function Tapomix\Castor\Docker\stop as docker_stop;
 use function Tapomix\Castor\Laravel\artisan;
@@ -32,6 +33,9 @@ function deploy(): void
         io()->section('Updating submodules');
         run(['git', 'submodule', 'update', '--init', '--recursive']);
     }
+
+    io()->section('Pulling images');
+    docker_pull(); // non-buildable images only: build() pulls the base images itself
 
     io()->section('Building images');
     docker_build();
