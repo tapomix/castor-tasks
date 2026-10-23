@@ -178,6 +178,10 @@ function app_context(): Context
 }
 ```
 
+The default context does not tolerate failures: when a command fails, the task stops and exits non-zero,
+wrappers included (`composer`, `console`, `artisan`, `npm`…). A failing task can therefore be caught by a CI,
+a git hook or `castor ... && ...`.
+
 ## Available Tasks
 
 Tasks are organized by namespace. Click on each section for detailed documentation and examples.

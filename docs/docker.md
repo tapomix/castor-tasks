@@ -240,6 +240,9 @@ function run(string $service, array $command, ?Context $context = null): Process
 
 **Returns:** `Process` - Symfony Process instance
 
+A failing command stops the task with a Castor error, unless the context allows failures
+(`context()->withAllowFailure()`): the returned `Process` can then be checked with `isSuccessful()`.
+
 **Example:**
 
 ```php
@@ -280,6 +283,9 @@ function exec(string $service, array $command, ?Context $context = null, array $
 - `$env` - Optional `['KEY' => 'value']` map, passed as `-e KEY=value` to `docker compose exec` (scoped to this call)
 
 **Returns:** `Process` - Symfony Process instance
+
+A failing command stops the task with a Castor error, unless the context allows failures
+(`context()->withAllowFailure()`): the returned `Process` can then be checked with `isSuccessful()`.
 
 **Example:**
 
