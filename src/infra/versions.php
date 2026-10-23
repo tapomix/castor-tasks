@@ -164,7 +164,7 @@ function readPinnedVersions(string $root): array
     $envFile = $root . '/' . (\defined('TAPOMIX_APP_ENV_FILE') ? TAPOMIX_APP_ENV_FILE : '.env.docker');
     if (\is_file($envFile)) {
         try {
-            $env = (new Dotenv())->parse((string) \file_get_contents($envFile), $envFile);
+            $env = new Dotenv()->parse((string) \file_get_contents($envFile), $envFile);
         } catch (FormatException) {
             $env = [];
         }

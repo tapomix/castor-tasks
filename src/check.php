@@ -42,7 +42,7 @@ function checkExecutables(array $executables): void
         castor_check(
             \sprintf('%s ?', \ucfirst($label)),
             \sprintf('%s executable missing', \ucfirst($label)),
-            fn (): bool => null !== (new ExecutableFinder())->find($exec)
+            fn (): bool => null !== new ExecutableFinder()->find($exec)
         );
     }
 }

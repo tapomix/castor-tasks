@@ -40,7 +40,7 @@ function generatePassword(int $length = 16): string
 
     // fill the rest randomly using random_bytes for more entropy
     for ($i = 4; $i < $length; ++$i) {
-        $randomIndex = \ord(\random_bytes(1)) % $allLength;
+        $randomIndex = \ord(\random_bytes(1)[0]) % $allLength;
         $password .= $allCharacters[$randomIndex];
     }
 
