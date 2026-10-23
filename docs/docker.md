@@ -74,11 +74,15 @@ castor build
 
 # Build without using cache
 castor build --no-cache
+
+# Build from the locally cached base images (e.g. offline)
+castor build --no-pull
 ```
 
 **Options:**
 
 - `--no-cache` - Build images without using cache
+- `--no-pull` - Skip pulling the base images (pulled by default, so a republished tag is picked up)
 
 ---
 
