@@ -50,8 +50,16 @@ function pull(): void
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Start all services', aliases: ['start', 'up'])]
-function start(): void
-{
+function start(
+    #[AsOption(shortcut: 'u', description: 'Pull and build the images first')]
+    bool $update = false,
+): void {
+    // up only recreates the containers whose image changed
+    if ($update) {
+        pull();
+        build();
+    }
+
     io()->title('Starting server');
 
     castor_run([...buildBaseDockerComposeCmd(), 'up', '--detach', '--wait']);
