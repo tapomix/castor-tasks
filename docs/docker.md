@@ -114,12 +114,24 @@ Start all services in detached mode and wait for them to be healthy.
 castor start
 # or
 castor up
+
+# Update the images first: pull the non-buildable ones, then build (base images pulled)
+castor start --update
+castor start -u
 ```
+
+**Options:**
+
+- `--update` / `-u` - Pull and build the images before starting (equivalent to `castor tapomix-docker:pull` then `castor build`)
 
 **Behavior:**
 
 - Services start in detached mode (`--detach`)
 - Command waits for services to be healthy (`--wait`)
+- Only the containers whose image changed are recreated, the others keep running
+
+`--update` applies an environment change without a full deploy, e.g. a new `PHP_VERSION` in the `.env` file
+or an image tag republished with a security fix. It needs network access: offline, run `castor start` alone.
 
 ---
 
