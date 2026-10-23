@@ -26,7 +26,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.3"
+        "tapomix/castor-tasks": "^0.4"
     }
 }
 ```
@@ -43,7 +43,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.3"
+        "tapomix/castor-tasks": "^0.4"
     }
 }
 ```

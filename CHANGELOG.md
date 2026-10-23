@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.0] - 2026-10-23
+
+### Added
+
+- `--update` (`-u`) option on `start` to pull and build the images first: only the containers whose image changed are recreated
+- `--no-pull` option on `build`
+
+### Changed
+
+- **Breaking:** the default context no longer tolerates failures: a failing command stops the task and exits non-zero,
+  wrappers included (`composer`, `console`, `artisan`, `npm`…). A custom task handling a failure must pass `context()->withAllowFailure()`
+- `build` pulls the base images by default, so a republished tag is picked up
+- `vps:deploy` pulls the non-buildable images before building, and stops at the first failing step
+- Updated Composer dependencies
+
+### Fixed
+
+- `symfony:test` exited `0` on a failing or crashing suite: it now exits with PHPUnit's exit code
+- QA tasks exited `0` when an analyzer reported errors: each task now exits with its tool's exit code, and `qa` with the highest one while still running every analyzer
+
+---
+
 ## [0.3.9] - 2026-10-20
 
 ### Changed
