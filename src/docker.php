@@ -78,7 +78,8 @@ function logs(): void
 {
     io()->title('Showing server logs');
 
-    castor_run([...buildBaseDockerComposeCmd(), 'logs', '-f']);
+    // -f: follow the log output, -t: show timestamps
+    castor_run([...buildBaseDockerComposeCmd(), 'logs', '-f', '-t']);
 }
 
 /** Note: Alias is 'shell' (not 'sh') to avoid confusion since the default shell is 'bash', not 'sh' */
