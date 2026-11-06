@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.2] - 2026-11-06
+
+### Changed
+
+- `logs` shows the timestamp of each log line
+- Updated Composer dependencies
+
+---
+
 ## [0.4.1] - 2026-10-23
 
 ### Changed
