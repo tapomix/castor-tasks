@@ -136,6 +136,11 @@ function validateComposeFile(string $composeFile, string $composeProfiles, strin
         return;
     }
 
+    // compose..yaml would match its own expectation: refuse it before comparing
+    if (TAPOMIX_ENV_UNDEFINED === $appEnv) {
+        throw new ProblemException('APP_ENV is not set (environment or .env): a site needs dev or prod.');
+    }
+
     $expected = siteComposeFile($appEnv);
 
     if ($composeFile !== $expected) {

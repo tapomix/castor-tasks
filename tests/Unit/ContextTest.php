@@ -23,9 +23,14 @@ class ContextTest extends TestCase
         $this->assertSame('dev', $data['APP.ENVIRONMENT']);
     }
 
-    public function testEnvironmentDefaultsToDev(): void
+    public function testEnvironmentIsUndefinedWithoutAppEnv(): void
     {
-        $this->assertSame('dev', appContextData([])['APP.ENVIRONMENT']);
+        $this->assertSame('', appContextData([])['APP.ENVIRONMENT']);
+    }
+
+    public function testEmptyAppEnvIsUndefined(): void
+    {
+        $this->assertSame('', appContextData(['APP_ENV' => ''])['APP.ENVIRONMENT']);
     }
 
     /** @return iterable<string, array{string, string, string}> */

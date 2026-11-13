@@ -59,6 +59,14 @@ class DockerTest extends TestCase
         validateComposeFile('compose.yaml', 'prod', 'prod', true);
     }
 
+    public function testSiteWithoutAppEnvIsRefused(): void
+    {
+        // with an undefined env the expected line is compose..yaml too: only the explicit check refuses it
+        $this->expectExceptionMessage('APP_ENV is not set');
+
+        validateComposeFile('compose.yaml:compose..yaml:compose.app.yaml:compose.override.yaml', '', '', true);
+    }
+
     public function testServiceAcceptsItsOwnList(): void
     {
         // Traefik in dev: no compose.sites.yaml, no profiles

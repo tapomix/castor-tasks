@@ -12,6 +12,8 @@ use Symfony\Component\Process\Process;
 
 /* The app env file, fixed: Compose reads `.env` by itself, castor must read the same one. */
 define('TAPOMIX_DOTENV_FILE', '.env');
+/* APP_ENV not set: its own state, not dev — the value .env actually holds, no invented sentinel. */
+define('TAPOMIX_ENV_UNDEFINED', '');
 define('TAPOMIX_CASTOR_ENV_FILE', '.castor/.env.castor');
 define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 
@@ -20,6 +22,8 @@ define('EXPR_FRAMEWORK_LARAVEL', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['
 
 define('EXPR_ENV_DEV', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIRONMENT'] === 'dev'");
 define('EXPR_ENV_PROD', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIRONMENT'] === 'prod'");
+// unset APP_ENV: a fresh clone, not yet configured (vps:init creates its .env), or the VPS itself
+define('EXPR_ENV_UNSET_OR_PROD', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIRONMENT'] in ['', 'prod']");
 
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
@@ -83,7 +87,7 @@ function appContextData(array $env): array
     return [
         'APP.DB.NAME' => $env['DB_NAME'] ?? 'db',
         'APP.DB.USER' => $env['DB_USER'] ?? 'user',
-        'APP.ENVIRONMENT' => $env['APP_ENV'] ?? 'dev',
+        'APP.ENVIRONMENT' => $env['APP_ENV'] ?? TAPOMIX_ENV_UNDEFINED,
         'APP.NAME' => $env['CONTAINER_NAME'] ?? 'app',
         'APP.SERVER_NAME' => $env['TRAEFIK_HOST'] ?? 'localhost',
 
