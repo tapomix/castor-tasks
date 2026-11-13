@@ -133,12 +133,12 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
 | `APP_CODE_PATH` | `code` | Path to application code in container |
-| `APP_DB_NAME` | `db` | Database name |
-| `APP_DB_USER` | `user` | Database user |
-| `APP_ENVIRONMENT` | `dev` | Application environment |
+| `APP_DB_NAME` | `DB_NAME`, then `db` | Database name |
+| `APP_DB_USER` | `DB_USER`, then `user` | Database user |
+| `APP_ENVIRONMENT` | `APP_ENV`, then `dev` | Application environment |
 | `APP_FRAMEWORK` | `vanilla` | Framework type (`vanilla`, `symfony`, `laravel`, ...) |
-| `APP_NAME` | `app` | Application name |
-| `APP_SERVER_NAME` | `localhost` | Server hostname |
+| `APP_NAME` | `CONTAINER_NAME`, then `app` | Application name |
+| `APP_SERVER_NAME` | `TRAEFIK_HOST`, then `localhost` | Server hostname |
 | `APP_SERVICE_DB` | `db` | Database service name in docker-compose |
 | `APP_SERVICE_NODE` | `node` | Node service name in docker-compose |
 | `APP_SERVICE_PHP` | `php` | PHP service name in docker-compose |
@@ -152,7 +152,15 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 
 The app environment file is always loaded first (if it exists), enabling variable interpolation in the Castor config.
 
-**Variable Interpolation:** You can reference variables from your project's main `.env.docker` file using `${VAR}` syntax. This avoids duplication.
+**Infra names by convention:** the app variables (`APP_ENVIRONMENT`, `APP_NAME`, `APP_DB_NAME`, `APP_DB_USER`,
+`APP_SERVER_NAME`) fall back on the names the infra template uses in the app env file (`APP_ENV`, `CONTAINER_NAME`,
+`DB_NAME`, `DB_USER`, `TRAEFIK_HOST`): a project built on the template sets none of them. Set an `APP_*` variable only
+when the app env uses another name, referencing it with `${VAR}`:
+
+```dotenv
+# .castor/.env.castor
+APP_DB_NAME=${DB_DATABASE}
+```
 
 ### Overriding the Default Context
 

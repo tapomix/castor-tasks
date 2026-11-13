@@ -21,10 +21,10 @@ project-root/
 The tasks automatically:
 
 - Load the base `compose.yaml` file
-- Load environment-specific compose file based on `APP_ENVIRONMENT` variable
+- Load environment-specific compose file based on `APP.ENVIRONMENT` (`APP_ENV` in the app env file)
 - Load `compose.app.yaml` if it exists
 - Load `compose.override.yaml` if it exists
-- Pass `--profile <APP_ENVIRONMENT>` to every command
+- Pass `--profile <APP.ENVIRONMENT>` to every command
 - Use the environment file defined in `DOCKER.ENV_FILE` (default: `.env.docker`)
 
 ### Layer order
@@ -50,11 +50,11 @@ services:
     # ...
 ```
 
-Every task passes `--profile ${APP_ENVIRONMENT}`, so profiled services follow the whole
+Every task passes `--profile <APP.ENVIRONMENT>`, so profiled services follow the whole
 lifecycle — a `stop` tears down what a `start` created. Services with no `profiles` key are
 always active.
 
-> ⚠️ The profile is always the value of `APP_ENVIRONMENT`, i.e. `dev` or `prod` in a standard
+> ⚠️ The profile is always the value of `APP.ENVIRONMENT`, i.e. `dev` or `prod` in a standard
 > setup. A project using a third environment (`staging`, `test`, ...) will not activate
 > `dev`- or `prod`-profiled services.
 
@@ -339,7 +339,7 @@ docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
 Set in your app's environment file (default: `.env.docker`):
 
 ```bash
-APP_ENVIRONMENT=dev  # or prod, staging, etc.
+APP_ENV=dev  # or prod, staging, etc. (APP_ENVIRONMENT in .castor/.env.castor overrides it)
 ```
 
 ### Optional Context Variables

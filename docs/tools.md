@@ -131,7 +131,8 @@ CASTOR_DEFAULT_BROWSER=chromium
 
 ### Server Name
 
-The browser task uses the application server name:
+The browser task uses the application server name, read from `TRAEFIK_HOST` in the app env file. `APP_SERVER_NAME`
+overrides it:
 
 ```bash
 # Set server hostname

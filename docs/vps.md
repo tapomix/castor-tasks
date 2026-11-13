@@ -42,7 +42,7 @@ castor vps:deploy
 The task stops at the first failing step and exits non-zero: a failed `git pull`, build or migration
 never ends with a restarted app reported as deployed.
 
-**Requires:** `APP_ENVIRONMENT=prod` — the task is only enabled when running against a production environment, to prevent an accidental run against a local/dev setup.
+**Requires:** `APP_ENV=prod` in the app env file (or the `APP_ENVIRONMENT` override) — the task is only enabled when running against a production environment, to prevent an accidental run against a local/dev setup.
 
 ---
 
