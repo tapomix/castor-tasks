@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.5.2] - 2026-11-13
+
+### Added
+
+- `service:update` and `vps:deploy` install the castor tasks when the pull brought a new castor lock, a failing install only warns
+
+### Changed
+
+- The castor lock helpers are shared in `src/castor-lock.php`, loaded by each task that needs them
+
+---
+
 ## [0.5.1] - 2026-11-13
 
 ### Added
