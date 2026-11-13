@@ -319,7 +319,8 @@ castor check
 Declare the site networks of the Traefik reverse proxy.
 
 ```bash
-castor traefik:site:add <site>
+castor traefik:site:add <site> [--puppeteer]
+castor traefik:site:puppeteer <site> [--revoke]
 castor traefik:site:remove <site>
 castor traefik:site:list
 ```
