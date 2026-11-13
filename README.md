@@ -101,7 +101,7 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset
 | `dns.php` | DNS/DNSSEC tasks only |
 | `infra.php` | Infra sync tasks only |
 | `php.php` | All tasks for a PHP project |
-| `service.php` | Generic Docker service tasks |
+| `service.php` | Generic Docker service tasks, with `check` |
 | `traefik.php` | Traefik site tasks, imported with `service.php` |
 
 A Docker service imports `service.php`, plus its own preset when it has one:
@@ -311,6 +311,7 @@ Update and restart a Docker service (Traefik, diun...) from its directory.
 
 ```bash
 castor service:update
+castor check
 ```
 
 ### 🔀 [Traefik Tasks](docs/traefik.md) (`tapomix-traefik`)
