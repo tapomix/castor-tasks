@@ -28,18 +28,19 @@ castor vps:init
 
 | Item | When absent | When present |
 | --- | --- | --- |
-| `.env` | copied from `.env.dist`, prefilled (below) | checked: `CONTAINER_NAME` set, `APP_ENV=prod`, `TRAEFIK_HOST` with a domain (not `domain.ext`), `DB_PASS` not `ChangeMe!` |
+| `.env` | copied from `.env.dist`, prefilled (below) | checked: `CONTAINER_NAME` set, `APP_ENV=prod`, `TRAEFIK_HOST` with a domain (not `domain.ext`), `DB_PASS` not `ChangeMe!`, `USER_ID` / `GROUP_ID` of the user running castor |
 | `<APP_CODE_PATH>/` | reported: `git submodule update --init` (an uninitialized submodule leaves it empty) | ✔ |
 | `.castor/.env.castor` | copied from `.env.castor.dist`, `APP_FRAMEWORK` detected — waits for the code | ✔ |
 | `compose.override.yaml` | written, comments only | ✔ |
 | `.docker/.composer-auth.json` | `{}` | ✔ |
 | `<APP_CODE_PATH>/.env.prod.local` | Symfony only: a generated `APP_SECRET` — add the project prod values by hand | checked: `APP_SECRET` set and not empty |
 | `COMPOSE_FILE` | — | validated as the docker tasks do |
-| Network `traefik-<CONTAINER_NAME>` | reported: declare the site in Traefik | ✔ |
+| Network `traefik-<CONTAINER_NAME>` | reported: declare the site in Traefik (a Docker error is reported as such, not as a missing network) | ✔ |
 
 **Prefill from the VPS layout.** Sites live in `<web>/<domain>/<site>`, served at `https://<site>.<domain>`; on
-creation, `.env` gets `CONTAINER_NAME=<site>`, `APP_ENV=prod`, `TRAEFIK_HOST=${CONTAINER_NAME}.<domain>` and a
-generated `DB_PASS`. The values are displayed: a site cloned elsewhere gets wrong ones, visible there and caught by
+creation, `.env` gets `CONTAINER_NAME=<site>`, `APP_ENV=prod`, `TRAEFIK_HOST=${CONTAINER_NAME}.<domain>`, a
+generated `DB_PASS`, and `USER_ID` / `GROUP_ID` of the user running castor (the container runs as that user and owns
+the bind-mounted files: not the `1000` default on a VPS whose user is `1001`). The values are displayed: a site cloned elsewhere gets wrong ones, visible there and caught by
 the network check.
 
 **Framework detection.** `<APP_CODE_PATH>/bin/console` → `symfony`, `<APP_CODE_PATH>/artisan` → `laravel`, otherwise
