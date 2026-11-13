@@ -43,12 +43,18 @@ castor service:update
 
 1. Stops when `COMPOSE_FILE` is not set, before touching anything
 2. `git pull`
-3. `docker compose pull --ignore-buildable`
-4. `docker compose build --pull` (nothing to do for an image-only service)
-5. `docker compose up --detach --wait --force-recreate`
+3. `castor castor:composer install`, only when the pull brought a new `.castor/castor.composer.lock`
+4. `docker compose pull --ignore-buildable`
+5. `docker compose build --pull` (nothing to do for an image-only service)
+6. `docker compose up --detach --wait --force-recreate`
 
 The containers are **always recreated**: Compose does not watch the content of the mounted config files, so a plain
 `up -d` silently keeps the old config. The service is cut for a few seconds (up to the healthcheck), an accepted cost.
+
+Castor does not reinstall its own dependencies when only the lock changes (a new castor-tasks version under the same
+constraint), hence step 3. The run in progress already loaded the previous tasks: the new ones apply from the next run.
+A failing install (network, GitHub) does not block the service: the task warns, with the command to run by hand, and
+goes on.
 
 The task stops at the first failing step and exits non-zero.
 
