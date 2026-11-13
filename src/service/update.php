@@ -12,6 +12,7 @@ use function Tapomix\Castor\CastorLock\installOnLockChange;
 use function Tapomix\Castor\CastorLock\lockHash;
 use function Tapomix\Castor\Docker\buildBaseDockerComposeCmd;
 use function Tapomix\Castor\Docker\composeContext;
+use function Tapomix\Castor\Docker\hasBuildableServices;
 
 // loaded here, not by the presets: a project may import this file alone (the template imports infra/sync.php);
 // require_once, like castor import(), so the file is loaded once whatever the path
@@ -42,7 +43,12 @@ function update(): void
     run([...$compose, 'pull', '--ignore-buildable'], context: composeContext());
 
     io()->section('Building images');
-    run([...$compose, 'build', '--pull'], context: composeContext());
+    if (hasBuildableServices()) {
+        run([...$compose, 'build', '--pull'], context: composeContext());
+    } else {
+        // an image-only service: docker compose would only warn "No services to build"
+        io()->text('No buildable service, skipped.');
+    }
 
     io()->section('Restarting containers');
     // always recreate: Compose does not watch the mounted config files, a plain `up` would keep the old config.

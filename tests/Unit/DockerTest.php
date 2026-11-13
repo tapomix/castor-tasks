@@ -6,6 +6,7 @@ use Castor\Exception\ProblemException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+use function Tapomix\Castor\Docker\hasBuildableService;
 use function Tapomix\Castor\Docker\siteComposeFile;
 use function Tapomix\Castor\Docker\validateComposeFile;
 
@@ -80,5 +81,22 @@ class DockerTest extends TestCase
         $this->expectException(ProblemException::class);
 
         validateComposeFile('', '', 'prod', false);
+    }
+
+    public function testImageOnlyServiceHasNothingToBuild(): void
+    {
+        // Traefik: `docker compose build` would warn "No services to build"
+        $this->assertFalse(hasBuildableService('{"services":{"traefik":{"image":"traefik:3.7.19"}}}'));
+    }
+
+    public function testServiceWithABuildHasSomethingToBuild(): void
+    {
+        $this->assertTrue(hasBuildableService('{"services":{"pgsql":{"image":"postgres"},"php":{"build":{"context":"."}}}}'));
+    }
+
+    public function testUnreadableConfigIsBuilt(): void
+    {
+        // when in doubt, build: docker compose reports the real problem
+        $this->assertTrue(hasBuildableService('not json'));
     }
 }

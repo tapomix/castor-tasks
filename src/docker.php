@@ -27,6 +27,14 @@ function build(bool $noCache = false, bool $noPull = false): void
     $context = context()->withVerbosityLevel(VerbosityLevel::VERBOSE);
 
     $cmd = buildBaseDockerComposeCmd();
+
+    // an image-only project (most services): docker compose would only warn "No services to build"
+    if (!hasBuildableServices()) {
+        io()->note('No buildable service, skipped.');
+
+        return;
+    }
+
     $cmd[] = 'build';
     if ($noCache) {
         $cmd[] = '--no-cache';
@@ -108,6 +116,25 @@ function buildBaseDockerComposeCmd(): array
     );
 
     return ['docker', 'compose'];
+}
+
+/** At least one service of the resolved config has a `build` key. */
+function hasBuildableServices(): bool
+{
+    $config = castor_run([...buildBaseDockerComposeCmd(), 'config', '--format', 'json'], context: composeContext()->withQuiet());
+
+    return hasBuildableService($config->getOutput());
+}
+
+/** Read from `docker compose config --format json`; an unreadable config counts as buildable, Compose then reports it. */
+function hasBuildableService(string $configJson): bool
+{
+    $config = \json_decode($configJson, true);
+    if (!\is_array($config) || !\is_array($config['services'] ?? null)) {
+        return true;
+    }
+
+    return array_any($config['services'], fn ($service): bool => \is_array($service) && \array_key_exists('build', $service));
 }
 
 /** The project root as working directory, whatever the shell one: the only way Compose finds `.env` from a subdirectory. */
