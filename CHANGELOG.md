@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.5.1] - 2026-11-13
+
+### Added
+
+- `--puppeteer` option on `traefik:site:add`, and `traefik:site:puppeteer` (`--revoke`) to grant or revoke the Puppeteer access of a site
+- `compose.sites.yaml` explains its networks in its generated header
+
+### Changed
+
+- **Breaking:** the `puppeteer` alias is only set on the sites that use Puppeteer, no longer on every site.
+  A 0.5.0 file keeps its aliases until a site is revoked
+- `traefik:site:list` shows the Puppeteer access of each site
+
+### Fixed
+
+- Install examples in the README require `^0.5`
+- `php.php` preset described as without `npm`
+- The site name is checked before reading `compose.sites.yaml`
+
+---
+
 ## [0.5.0] - 2026-11-13
 
 ### Added
