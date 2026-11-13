@@ -4,6 +4,9 @@ use function Castor\import;
 
 // import only php related tasks
 
+// a site: its COMPOSE_FILE must be exactly the four site levels (see validateComposeFile() in src/docker.php)
+define('TAPOMIX_PROJECT_SITE', true);
+
 import(__DIR__ . '/../src/db');
 import(__DIR__ . '/../src/infra');
 import(__DIR__ . '/../src/laravel');

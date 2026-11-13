@@ -13,7 +13,6 @@ use Castor\Helper\PathHelper;
 use Symfony\Component\Process\Process;
 
 use function Castor\context;
-use function Castor\fs;
 use function Castor\io;
 use function Castor\run as castor_run;
 use function Castor\variable;
@@ -38,15 +37,15 @@ function build(bool $noCache = false, bool $noPull = false): void
         $cmd[] = '--pull';
     }
 
-    castor_run($cmd, context: $context);
+    castor_run($cmd, context: composeContext($context));
 }
 
-#[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Pull fresh images')]
+#[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Pull fresh images', aliases: ['pull'])]
 function pull(): void
 {
     io()->title('Pulling images');
 
-    castor_run([...buildBaseDockerComposeCmd(), 'pull', '--ignore-buildable']);
+    castor_run([...buildBaseDockerComposeCmd(), 'pull', '--ignore-buildable'], context: composeContext());
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Start all services', aliases: ['start', 'up'])]
@@ -62,7 +61,7 @@ function start(
 
     io()->title('Starting server');
 
-    castor_run([...buildBaseDockerComposeCmd(), 'up', '--detach', '--wait']);
+    castor_run([...buildBaseDockerComposeCmd(), 'up', '--detach', '--wait'], context: composeContext());
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Stop all services', aliases: ['stop', 'down'])]
@@ -70,7 +69,7 @@ function stop(): void
 {
     io()->title('Stopping server');
 
-    castor_run([...buildBaseDockerComposeCmd(), 'down', '--remove-orphans']);
+    castor_run([...buildBaseDockerComposeCmd(), 'down', '--remove-orphans'], context: composeContext());
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_DOCKER, description: 'Show server logs', aliases: ['logs'])]
@@ -79,7 +78,7 @@ function logs(): void
     io()->title('Showing server logs');
 
     // -f: follow the log output, -t: show timestamps
-    castor_run([...buildBaseDockerComposeCmd(), 'logs', '-f', '-t']);
+    castor_run([...buildBaseDockerComposeCmd(), 'logs', '-f', '-t'], context: composeContext());
 }
 
 /** Note: Alias is 'shell' (not 'sh') to avoid confusion since the default shell is 'bash', not 'sh' */
@@ -92,63 +91,66 @@ function shell(
     exec($service, [$shell]);
 }
 
-/** @return string[] */
+/**
+ * Plain `docker compose`: the project `.env` picks the compose files (COMPOSE_FILE) and the profiles, so a hand-typed
+ * `docker compose` sees the same config. Validated first: Compose silently ignores a file left out of COMPOSE_FILE.
+ * Run it through composeContext(): Compose reads `.env` and resolves COMPOSE_FILE from its working directory.
+ *
+ * @return string[]
+ */
 function buildBaseDockerComposeCmd(): array
 {
-    $appEnvironment = (string) variable('APP.ENVIRONMENT');
-    $root = PathHelper::getRoot();
+    validateComposeFile(
+        (string) variable('COMPOSE.FILE'),
+        (string) variable('COMPOSE.PROFILES'),
+        (string) variable('APP.ENVIRONMENT'),
+        \defined('TAPOMIX_PROJECT_SITE'), // defined by the php preset
+    );
 
-    $dockerEnvFile = $root . '/' . TAPOMIX_DOTENV_FILE;
-    $envCompose = 'compose.' . $appEnvironment . '.yaml';
+    return ['docker', 'compose'];
+}
 
-    if (!fs()->exists($root . '/' . $envCompose)) {
-        throw new ProblemException('Specific Docker Compose not found');
+/** The project root as working directory, whatever the shell one: the only way Compose finds `.env` from a subdirectory. */
+function composeContext(?Context $context = null): Context
+{
+    return ($context ?? context())->withWorkingDirectory(PathHelper::getRoot());
+}
+
+/** The compose files of a site, in this order, in every environment: base, environment, app, machine-local override. */
+function siteComposeFile(string $appEnv): string
+{
+    return \sprintf('compose.yaml:compose.%s.yaml:compose.app.yaml:compose.override.yaml', $appEnv);
+}
+
+/**
+ * COMPOSE_FILE must be set in every project; a site must load exactly its four levels, with the profile of its env.
+ * A service lists its own files, never checked: they vary (Traefik leaves compose.sites.yaml out in dev).
+ */
+function validateComposeFile(string $composeFile, string $composeProfiles, string $appEnv, bool $site): void
+{
+    if (!$site) {
+        if ('' === $composeFile) {
+            throw new ProblemException('COMPOSE_FILE is not set in the .env: docker compose would load compose.yaml alone.');
+        }
+
+        return;
     }
 
-    if (!fs()->exists($dockerEnvFile)) {
-        throw new ProblemException('Docker Compose config not found');
+    $expected = siteComposeFile($appEnv);
+
+    if ($composeFile !== $expected) {
+        throw new ProblemException(\sprintf('COMPOSE_FILE is "%s" in the .env, expected "%s" (APP_ENV=%s).', $composeFile, $expected, $appEnv));
     }
 
-    // always use base file + env specific + custom override if exists
-    $composes = [
-        'compose.yaml', // base
-        $envCompose, // env specific
-    ];
-
-    // project-wide, committed: common to every environment of this project
-    if (fs()->exists($root . '/compose.app.yaml')) {
-        $composes[] = 'compose.app.yaml';
+    if ($composeProfiles !== $appEnv) {
+        throw new ProblemException(\sprintf('COMPOSE_PROFILES is "%s" in the .env, expected "%s" (APP_ENV).', $composeProfiles, $appEnv));
     }
-
-    if (fs()->exists($root . '/compose.override.yaml')) {
-        $composes[] = 'compose.override.yaml'; // custom override
-    }
-
-    // build the base command
-    $cmd = [
-        'docker',
-        'compose',
-    ];
-
-    foreach ($composes as $compose) {
-        $cmd[] = '-f';
-        $cmd[] = $root . '/' . $compose;
-    }
-
-    // let compose.app.yaml gate services per environment (profiles: [dev] / [prod])
-    $cmd[] = '--profile';
-    $cmd[] = $appEnvironment;
-
-    // finally, add the env file
-    $cmd[] = '--env-file=' . $dockerEnvFile;
-
-    return $cmd;
 }
 
 /** @param string[] $command */
 function run(string $service, array $command, ?Context $context = null): Process
 {
-    return castor_run([...buildBaseDockerComposeCmd(), 'run', '--rm', $service, ...$command], context: $context);
+    return castor_run([...buildBaseDockerComposeCmd(), 'run', '--rm', $service, ...$command], context: composeContext($context));
 }
 
 /**
@@ -162,5 +164,5 @@ function exec(string $service, array $command, ?Context $context = null, array $
         $envArgs = [...$envArgs, '-e', \sprintf('%s=%s', $key, $value)];
     }
 
-    return castor_run([...buildBaseDockerComposeCmd(), 'exec', ...$envArgs, $service, ...$command], context: $context);
+    return castor_run([...buildBaseDockerComposeCmd(), 'exec', ...$envArgs, $service, ...$command], context: composeContext($context));
 }
