@@ -4,6 +4,7 @@ namespace Tapomix\Castor\Tests\Unit\Service;
 
 use PHPUnit\Framework\TestCase;
 
+use function Tapomix\Castor\Service\hashFile;
 use function Tapomix\Castor\Service\isComposeFileDefined;
 
 class UpdateTest extends TestCase
@@ -33,5 +34,27 @@ class UpdateTest extends TestCase
     public function testComposeFileCommentedOut(): void
     {
         $this->assertFalse(isComposeFileDefined([], "# COMPOSE_FILE=compose.yaml:compose.prod.yaml\n"));
+    }
+
+    public function testHashFileOfAbsentFile(): void
+    {
+        $this->assertNull(hashFile(sys_get_temp_dir() . '/castor-service-test-absent.lock'));
+    }
+
+    public function testHashFileDetectsAChange(): void
+    {
+        $path = (string) tempnam(sys_get_temp_dir(), 'castor-service-test');
+
+        try {
+            file_put_contents($path, '{"packages": [{"version": "0.5.0"}]}');
+            $before = hashFile($path);
+
+            file_put_contents($path, '{"packages": [{"version": "0.5.1"}]}');
+
+            $this->assertNotNull($before);
+            $this->assertNotSame($before, hashFile($path));
+        } finally {
+            unlink($path);
+        }
     }
 }
