@@ -37,6 +37,15 @@ class DeployTest extends TestCase
         $this->assertSame('{"github-oauth": {}}', file_get_contents($root . '/.docker/.composer-auth.json'));
     }
 
+    public function testComposerAuthFileIsCreatedWithoutDockerDirectory(): void
+    {
+        $this->root = sys_get_temp_dir() . '/deploy-test-' . uniqid();
+        mkdir($this->root);
+        ensureComposerAuthFile($this->root);
+
+        $this->assertSame('{}', file_get_contents($this->root . '/.docker/.composer-auth.json'));
+    }
+
     private function tempRoot(): string
     {
         $this->root = sys_get_temp_dir() . '/deploy-test-' . uniqid();

@@ -130,7 +130,7 @@ function validateComposeFile(string $composeFile, string $composeProfiles, strin
 {
     if (!$site) {
         if ('' === $composeFile) {
-            throw new ProblemException('COMPOSE_FILE is not set in the .env: docker compose would load compose.yaml alone.');
+            throw new ProblemException('COMPOSE_FILE is not set (environment or .env): docker compose would load compose.yaml alone.');
         }
 
         return;
@@ -139,11 +139,11 @@ function validateComposeFile(string $composeFile, string $composeProfiles, strin
     $expected = siteComposeFile($appEnv);
 
     if ($composeFile !== $expected) {
-        throw new ProblemException(\sprintf('COMPOSE_FILE is "%s" in the .env, expected "%s" (APP_ENV=%s).', $composeFile, $expected, $appEnv));
+        throw new ProblemException(\sprintf('COMPOSE_FILE is "%s" (environment or .env), expected "%s" (APP_ENV=%s).', $composeFile, $expected, $appEnv));
     }
 
     if ($composeProfiles !== $appEnv) {
-        throw new ProblemException(\sprintf('COMPOSE_PROFILES is "%s" in the .env, expected "%s" (APP_ENV).', $composeProfiles, $appEnv));
+        throw new ProblemException(\sprintf('COMPOSE_PROFILES is "%s" (environment or .env), expected "%s" (APP_ENV).', $composeProfiles, $appEnv));
     }
 }
 

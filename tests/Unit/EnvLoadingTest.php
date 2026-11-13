@@ -72,6 +72,16 @@ class EnvLoadingTest extends TestCase
         $this->assertSame('symfony', $_SERVER['APP_FRAMEWORK']);
     }
 
+    public function testExportedVariableWinsOverEnv(): void
+    {
+        // as for Compose: castor must validate the value Compose will use
+        $_SERVER['COMPOSE_FILE'] = 'compose.yaml:compose.exported.yaml';
+        file_put_contents($this->root . '/.env', "COMPOSE_FILE=compose.yaml:compose.override.yaml\n");
+        loadEnvFiles($this->root);
+
+        $this->assertSame('compose.yaml:compose.exported.yaml', appContextData($_SERVER)['COMPOSE.FILE']);
+    }
+
     public function testCastorFileInterpolatesEnvValues(): void
     {
         file_put_contents($this->root . '/.env', "CONTAINER_NAME=bank\n");

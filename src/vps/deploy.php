@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tapomix\Castor\Vps;
 
 use Castor\Attribute\AsTask;
+use Castor\Exception\ProblemException;
 use Castor\Helper\PathHelper;
 
 use function Castor\fs;
@@ -84,7 +85,11 @@ function ensureComposerAuthFile(string $root): void
 {
     $path = $root . '/.docker/.composer-auth.json';
 
-    if (!\is_file($path)) {
-        \file_put_contents($path, '{}');
+    if (\is_file($path)) {
+        return;
+    }
+
+    if (!\is_dir(\dirname($path)) && !\mkdir(\dirname($path), 0o755, true) || false === \file_put_contents($path, '{}')) {
+        throw new ProblemException(\sprintf('Unable to create "%s", the build needs it: create it with "{}".', $path));
     }
 }

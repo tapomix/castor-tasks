@@ -50,9 +50,8 @@ class ContextTest extends TestCase
         $this->assertSame('bankdb', $data['APP.DB.NAME']);
     }
 
-    public function testComposeVariablesComeFromTheEnvironment(): void
+    public function testComposeVariablesAreMapped(): void
     {
-        // an exported COMPOSE_FILE wins over .env for Compose: castor must validate that same value
         $data = appContextData(['COMPOSE_FILE' => 'compose.yaml:compose.prod.yaml', 'COMPOSE_PROFILES' => 'prod']);
 
         $this->assertSame('compose.yaml:compose.prod.yaml', $data['COMPOSE.FILE']);

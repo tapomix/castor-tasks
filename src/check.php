@@ -13,6 +13,9 @@ use function Castor\fs;
 use function Castor\io;
 use function Tapomix\Castor\Docker\buildBaseDockerComposeCmd;
 
+// loaded here too: a project may import this file without a preset; require_once, like castor import()
+require_once __DIR__ . '/docker.php';
+
 #[AsTask(name: 'check', description: 'Check requirements', aliases: ['check'])]
 function check(): void
 {
@@ -28,7 +31,6 @@ function check(): void
 
     checkFiles(requiredEnvFiles());
 
-    // php and service presets: both import docker.php
     io()->title('Checking compose files');
     buildBaseDockerComposeCmd();
     io()->text('COMPOSE_FILE OK');

@@ -51,6 +51,14 @@ class DockerTest extends TestCase
         validateComposeFile('compose.yaml', 'prod', 'prod', true);
     }
 
+    public function testRefusalDoesNotBlameTheEnvFileAlone(): void
+    {
+        // the value may come from an exported variable, which wins over .env
+        $this->expectExceptionMessage('environment or .env');
+
+        validateComposeFile('compose.yaml', 'prod', 'prod', true);
+    }
+
     public function testServiceAcceptsItsOwnList(): void
     {
         // Traefik in dev: no compose.sites.yaml, no profiles
