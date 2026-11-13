@@ -11,6 +11,7 @@ use Symfony\Component\Process\ExecutableFinder;
 use function Castor\check as castor_check;
 use function Castor\fs;
 use function Castor\io;
+use function Tapomix\Castor\Docker\buildBaseDockerComposeCmd;
 
 #[AsTask(name: 'check', description: 'Check requirements', aliases: ['check'])]
 function check(): void
@@ -26,6 +27,11 @@ function check(): void
     io()->title('Checking env files');
 
     checkFiles(requiredEnvFiles());
+
+    // php and service presets: both import docker.php
+    io()->title('Checking compose files');
+    buildBaseDockerComposeCmd();
+    io()->text('COMPOSE_FILE OK');
 
     if (!fs()->exists(PathHelper::getRoot() . '/' . TAPOMIX_CASTOR_ENV_FILE)) {
         io()->note(\sprintf('No castor file "%s": optional, the defaults apply.', TAPOMIX_CASTOR_ENV_FILE));
