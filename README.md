@@ -156,6 +156,8 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 2. **Castor environment file** (`.castor/.env.castor`)
 
 The app environment file is always loaded first (if it exists), enabling variable interpolation in the Castor config.
+It is read as Compose reads it: this single file, no `APP_ENV` default, no `.env.local` / `.env.<env>`. The castor
+file only adds variables, it never replaces a `.env` one; a variable exported in the shell wins over both.
 
 **One source of truth:** the app variables are read from the infra names of the `.env` only (`APP_ENV`,
 `CONTAINER_NAME`, `DB_NAME`, `DB_USER`, `TRAEFIK_HOST`), the ones Compose uses too: castor and Compose cannot disagree
