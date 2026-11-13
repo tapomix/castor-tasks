@@ -33,7 +33,7 @@ castor browser --browser=chromium
 
 **How it works:**
 
-The task opens the URL `https://{APP_SERVER_NAME}` in the specified browser:
+The task opens the URL `https://{TRAEFIK_HOST}` in the specified browser:
 
 ```bash
 # castor browser

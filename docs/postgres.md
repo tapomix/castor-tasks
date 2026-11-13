@@ -112,7 +112,7 @@ docker compose (...options...) exec db pg_dump -O -U user -f /sql/dump-app-2024-
 Backups are saved in `.docker/db/dump/` directory with the naming pattern:
 
 ```txt
-dump-{APP_NAME}-{timing}.sql
+dump-{CONTAINER_NAME}-{timing}.sql
 ```
 
 **Example:**
