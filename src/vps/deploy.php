@@ -11,12 +11,18 @@ use function Castor\fs;
 use function Castor\io;
 use function Castor\run;
 use function Castor\variable;
+use function Tapomix\Castor\CastorLock\installOnLockChange;
+use function Tapomix\Castor\CastorLock\lockHash;
 use function Tapomix\Castor\Docker\build as docker_build;
 use function Tapomix\Castor\Docker\pull as docker_pull;
 use function Tapomix\Castor\Docker\start as docker_start;
 use function Tapomix\Castor\Docker\stop as docker_stop;
 use function Tapomix\Castor\Laravel\artisan;
 use function Tapomix\Castor\Symfony\console;
+
+// loaded here, not by the presets: a project may import this file alone (the template imports infra/sync.php);
+// require_once, like castor import(), so the file is loaded once whatever the path
+require_once __DIR__ . '/../castor-lock.php';
 
 define('TAPOMIX_NAMESPACE_VPS', 'tapomix-vps');
 
@@ -25,8 +31,13 @@ function deploy(): void
 {
     io()->title('Deploying latest code on the VPS');
 
+    // read the lock before the pull, to detect the one the pull is about to bring
+    $castorLockBefore = lockHash();
+
     io()->section('Pulling latest code');
     run(['git', 'pull']);
+
+    installOnLockChange($castorLockBefore);
 
     // Apps may keep code directly at the repo root (APP_CODE_PATH=.) instead of a submodule
     if (fs()->exists(PathHelper::getRoot() . '/.gitmodules')) {
