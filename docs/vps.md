@@ -30,14 +30,20 @@ castor vps:deploy
 **Behavior:**
 
 1. `git pull` on the app's root repo
-2. `git submodule update --init --recursive` — only if the project uses a submodule (`.gitmodules` present); skipped when the app code lives directly at the repo root
-3. Pull the non-buildable images (equivalent to `castor tapomix-docker:pull`)
-4. Rebuild all Docker images, base images pulled (equivalent to `castor build`)
-5. Restart all containers (equivalent to `castor stop` then `castor start`)
-6. Run pending migrations, based on `APP.FRAMEWORK`:
+2. `castor castor:composer install` — only when the pull brought a new `.castor/castor.composer.lock`
+3. `git submodule update --init --recursive` — only if the project uses a submodule (`.gitmodules` present); skipped when the app code lives directly at the repo root
+4. Pull the non-buildable images (equivalent to `castor tapomix-docker:pull`)
+5. Rebuild all Docker images, base images pulled (equivalent to `castor build`)
+6. Restart all containers (equivalent to `castor stop` then `castor start`)
+7. Run pending migrations, based on `APP.FRAMEWORK`:
    - Symfony → `doctrine:migrations:migrate --no-interaction`
    - Laravel → `artisan migrate --force`
    - Other frameworks → step skipped
+
+Castor does not reinstall its own dependencies when only the lock changes (a new castor-tasks version under the same
+constraint), hence step 2. The run in progress already loaded the previous tasks: the new ones apply from the next run.
+A failing install (network, GitHub) does not block the deployment: the task warns, with the command to run by hand,
+and goes on.
 
 The task stops at the first failing step and exits non-zero: a failed `git pull`, build or migration
 never ends with a restarted app reported as deployed.
