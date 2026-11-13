@@ -26,7 +26,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.4"
+        "tapomix/castor-tasks": "^0.5"
     }
 }
 ```
@@ -43,7 +43,7 @@ Collection of reusable [Castor](https://castor.jolicode.com/) tasks for PHP deve
         }
     ],
     "require": {
-        "tapomix/castor-tasks": "^0.4"
+        "tapomix/castor-tasks": "^0.5"
     }
 }
 ```
@@ -100,7 +100,7 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset
 | ------ | ----------- |
 | `dns.php` | DNS/DNSSEC tasks only |
 | `infra.php` | Infra sync tasks only |
-| `php.php` | All tasks for a PHP project |
+| `php.php` | PHP project tasks, without `npm`: import `src/node` for it |
 | `service.php` | Generic Docker service tasks, with `check` |
 | `traefik.php` | Traefik site tasks, imported with `service.php` |
 
