@@ -16,11 +16,11 @@ class ContextTest extends TestCase
         $this->assertSame('prod', $data['APP.ENVIRONMENT']);
     }
 
-    public function testAppEnvironmentOverridesAppEnv(): void
+    public function testAppEnvironmentOverrideIsIgnored(): void
     {
-        $data = appContextData(['APP_ENVIRONMENT' => 'staging', 'APP_ENV' => 'prod']);
+        $data = appContextData(['APP_ENVIRONMENT' => 'prod', 'APP_ENV' => 'dev']);
 
-        $this->assertSame('staging', $data['APP.ENVIRONMENT']);
+        $this->assertSame('dev', $data['APP.ENVIRONMENT']);
     }
 
     public function testEnvironmentDefaultsToDev(): void
@@ -43,10 +43,27 @@ class ContextTest extends TestCase
         $this->assertSame($value, appContextData([$infraName => $value])[$contextKey]);
     }
 
-    public function testAppVariablesOverrideInfraNames(): void
+    public function testAppVariableOverridesAreIgnored(): void
     {
         $data = appContextData(['APP_DB_NAME' => 'other', 'DB_NAME' => 'bankdb']);
 
-        $this->assertSame('other', $data['APP.DB.NAME']);
+        $this->assertSame('bankdb', $data['APP.DB.NAME']);
+    }
+
+    public function testComposeVariablesComeFromTheEnvironment(): void
+    {
+        // an exported COMPOSE_FILE wins over .env for Compose: castor must validate that same value
+        $data = appContextData(['COMPOSE_FILE' => 'compose.yaml:compose.prod.yaml', 'COMPOSE_PROFILES' => 'prod']);
+
+        $this->assertSame('compose.yaml:compose.prod.yaml', $data['COMPOSE.FILE']);
+        $this->assertSame('prod', $data['COMPOSE.PROFILES']);
+    }
+
+    public function testComposeVariablesDefaultToEmpty(): void
+    {
+        $data = appContextData([]);
+
+        $this->assertSame('', $data['COMPOSE.FILE']);
+        $this->assertSame('', $data['COMPOSE.PROFILES']);
     }
 }

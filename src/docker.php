@@ -98,7 +98,7 @@ function buildBaseDockerComposeCmd(): array
     $appEnvironment = (string) variable('APP.ENVIRONMENT');
     $root = PathHelper::getRoot();
 
-    $dockerEnvFile = $root . '/' . variable('DOCKER.ENV_FILE');
+    $dockerEnvFile = $root . '/' . TAPOMIX_DOTENV_FILE;
     $envCompose = 'compose.' . $appEnvironment . '.yaml';
 
     if (!fs()->exists($root . '/' . $envCompose)) {

@@ -11,7 +11,6 @@ use Symfony\Component\Process\ExecutableFinder;
 use function Castor\check as castor_check;
 use function Castor\fs;
 use function Castor\io;
-use function Castor\variable;
 
 #[AsTask(name: 'check', description: 'Check requirements', aliases: ['check'])]
 function check(): void
@@ -26,7 +25,7 @@ function check(): void
 
     io()->title('Checking env files');
 
-    checkFiles(requiredEnvFiles((string) variable('DOCKER.ENV_FILE')));
+    checkFiles(requiredEnvFiles());
 
     if (!fs()->exists(PathHelper::getRoot() . '/' . TAPOMIX_CASTOR_ENV_FILE)) {
         io()->note(\sprintf('No castor file "%s": optional, the defaults apply.', TAPOMIX_CASTOR_ENV_FILE));
@@ -40,9 +39,9 @@ function check(): void
  *
  * @return array<string, string> label => file path
  */
-function requiredEnvFiles(string $appEnvFile): array
+function requiredEnvFiles(): array
 {
-    return ['app' => $appEnvFile];
+    return ['app' => TAPOMIX_DOTENV_FILE];
 }
 
 /** @param array<string, string> $executables */

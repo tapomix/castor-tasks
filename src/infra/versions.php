@@ -161,7 +161,7 @@ function readPinnedVersions(string $root): array
     }
 
     // the env file overrides a pin for a local test, as compose itself does
-    $envFile = $root . '/' . (\defined('TAPOMIX_APP_ENV_FILE') ? TAPOMIX_APP_ENV_FILE : '.env.docker');
+    $envFile = $root . '/' . TAPOMIX_DOTENV_FILE;
     if (\is_file($envFile)) {
         try {
             $env = new Dotenv()->parse((string) \file_get_contents($envFile), $envFile);

@@ -11,6 +11,6 @@ class CheckTest extends TestCase
     public function testOnlyTheAppEnvFileIsRequired(): void
     {
         // the castor env file is optional, as in the default context: a Docker service has none
-        $this->assertSame(['app' => '.env'], requiredEnvFiles('.env'));
+        $this->assertSame(['app' => '.env'], requiredEnvFiles());
     }
 }

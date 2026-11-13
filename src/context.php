@@ -12,6 +12,8 @@ use Symfony\Component\Process\Process;
 use function Castor\fs;
 use function Castor\load_dot_env;
 
+/* The app env file, fixed: Compose reads `.env` by itself, castor must read the same one. */
+define('TAPOMIX_DOTENV_FILE', '.env');
 define('TAPOMIX_CASTOR_ENV_FILE', '.castor/.env.castor');
 define('TAPOMIX_DEFAULT_CONTEXT', 'tapomix-default');
 
@@ -24,14 +26,10 @@ define('EXPR_ENV_PROD', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIR
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
 {
-    if (!defined('TAPOMIX_APP_ENV_FILE')) { // constant may be defined in castor.php from app
-        define('TAPOMIX_APP_ENV_FILE', '.env.docker');
-    }
-
     $root = PathHelper::getRoot();
 
     // load app env first to enable variable interpolation
-    $appEnvFile = $root . '/' . TAPOMIX_APP_ENV_FILE;
+    $appEnvFile = $root . '/' . TAPOMIX_DOTENV_FILE;
     if (fs()->exists($appEnvFile)) {
         load_dot_env($appEnvFile);
     }
@@ -50,7 +48,6 @@ function default_context(): Context
 
         'INFRA.REMOTE' => $_SERVER['INFRA_REMOTE'] ?? 'infra',
 
-        'DOCKER.ENV_FILE' => TAPOMIX_APP_ENV_FILE, // ! constant !
         'DOCKER.SERVICES.DB' => $_SERVER['APP_SERVICE_DB'] ?? 'db',
         'DOCKER.SERVICES.NODE' => $_SERVER['APP_SERVICE_NODE'] ?? 'node',
         'DOCKER.SERVICES.PHP' => $_SERVER['APP_SERVICE_PHP'] ?? 'php',
@@ -65,8 +62,8 @@ function default_context(): Context
 }
 
 /**
- * App variables, read from the infra names of the app env file by convention.
- * The `APP_*` variables override them, for an app env that uses other names.
+ * App variables, read from the infra names of the app env file only: castor and Compose read the same values.
+ * The compose variables come from the environment first, as Compose itself does.
  *
  * @param array<string, mixed> $env
  *
@@ -75,11 +72,14 @@ function default_context(): Context
 function appContextData(array $env): array
 {
     return [
-        'APP.DB.NAME' => $env['APP_DB_NAME'] ?? $env['DB_NAME'] ?? 'db',
-        'APP.DB.USER' => $env['APP_DB_USER'] ?? $env['DB_USER'] ?? 'user',
-        'APP.ENVIRONMENT' => $env['APP_ENVIRONMENT'] ?? $env['APP_ENV'] ?? 'dev',
-        'APP.NAME' => $env['APP_NAME'] ?? $env['CONTAINER_NAME'] ?? 'app',
-        'APP.SERVER_NAME' => $env['APP_SERVER_NAME'] ?? $env['TRAEFIK_HOST'] ?? 'localhost',
+        'APP.DB.NAME' => $env['DB_NAME'] ?? 'db',
+        'APP.DB.USER' => $env['DB_USER'] ?? 'user',
+        'APP.ENVIRONMENT' => $env['APP_ENV'] ?? 'dev',
+        'APP.NAME' => $env['CONTAINER_NAME'] ?? 'app',
+        'APP.SERVER_NAME' => $env['TRAEFIK_HOST'] ?? 'localhost',
+
+        'COMPOSE.FILE' => $env['COMPOSE_FILE'] ?? '',
+        'COMPOSE.PROFILES' => $env['COMPOSE_PROFILES'] ?? '',
     ];
 }
 

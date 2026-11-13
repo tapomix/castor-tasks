@@ -63,7 +63,7 @@ class VersionsTest extends TestCase
 
         file_put_contents($this->tempDir . '/compose.yaml', 'image: postgres:${PG_VERSION:-18}-alpine');
         file_put_contents($this->tempDir . '/compose.app.yaml', "PHP_VERSION: \${PHP_VERSION:-8.4.25}\nimage: postgres:\${PG_VERSION:-18.6}-alpine");
-        file_put_contents($this->tempDir . '/.env.docker', "PHP_VERSION=8.4.20\n# PG_VERSION=17\nOTHER_VERSION=1.0\n");
+        file_put_contents($this->tempDir . '/.env', "PHP_VERSION=8.4.20\n# PG_VERSION=17\nOTHER_VERSION=1.0\n");
 
         $this->assertSame(
             ['PG_VERSION' => '18.6', 'PHP_VERSION' => '8.4.20'],
