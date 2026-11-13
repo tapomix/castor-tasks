@@ -71,9 +71,12 @@ castor password -l 20
 The password generator:
 
 - Ensures at least one character from each category: lowercase, uppercase, digit, special character
-- Uses `random_bytes()` for cryptographic security
-- Shuffles the final result
-- Available special characters: `!@#$%&*-_+=?`
+- Uses `random_int()` for every pick and for the shuffle (Fisher-Yates): cryptographically secure, unbiased
+- Available special characters: `!&*-_+=` — safe in a `.env` and in a URL: no `$` (Compose interpolation), `%`
+  (encoding, Symfony `%env(resolve:)%`), `@ # ?` (`DATABASE_URL` delimiters)
+
+For a secret read by programs only (`DB_PASS`, `APP_SECRET`), prefer `castor token`: hexadecimal, longer, nothing to
+escape anywhere.
 
 **Example output:**
 

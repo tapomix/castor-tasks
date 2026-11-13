@@ -290,9 +290,10 @@ castor infra:versions --strict
 
 ### 🚀 [VPS Tasks](docs/vps.md) (`tapomix-vps`)
 
-Update and restart the app on the VPS after new code has been pushed to it.
+Initialize a freshly cloned site, then update and restart it after new code has been pushed to it.
 
 ```bash
+castor vps:init
 castor vps:deploy
 ```
 

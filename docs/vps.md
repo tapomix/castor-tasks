@@ -1,6 +1,6 @@
 # VPS Tasks
 
-Update and restart the app on the VPS after new code has been pushed to it.
+Initialize a site freshly cloned on the VPS, then update and restart it after new code has been pushed to it.
 
 **Namespace:** `tapomix-vps`
 
@@ -14,6 +14,46 @@ The `vps:deploy` task automates that sequence into a single command, run **on th
 > The `vps:` prefix is deliberate: it distinguishes tasks that run *on* the VPS from the act of pushing code *to* the VPS (a plain `git push` to your VPS remote, a separate step not covered by this package).
 
 ## Available Tasks
+
+### `init` - Initialize a Freshly Cloned Site
+
+Bring a site checkout to a deployable state: create what is missing, never overwrite, report every item. Run it again
+until everything is ✔ — the output is the to-do list; the task exits non-zero while an item needs you.
+
+**Aliases:** `vps:init`
+
+```bash
+castor vps:init
+```
+
+| Item | When absent | When present |
+| --- | --- | --- |
+| `.env` | copied from `.env.dist`, prefilled (below) | checked: `CONTAINER_NAME` set, `APP_ENV=prod`, `DB_PASS` not `ChangeMe!` |
+| `.castor/.env.castor` | copied from `.env.castor.dist`, `APP_FRAMEWORK` detected | ✔ |
+| `compose.override.yaml` | written, comments only | ✔ |
+| `.docker/.composer-auth.json` | `{}` | ✔ |
+| `<APP_CODE_PATH>/.env.prod.local` | Symfony only: a generated `APP_SECRET` — add the project prod values by hand | checked: `APP_SECRET` set and not empty |
+| `COMPOSE_FILE` | — | validated as the docker tasks do |
+| Network `traefik-<CONTAINER_NAME>` | reported: declare the site in Traefik | ✔ |
+
+**Prefill from the VPS layout.** Sites live in `<web>/<domain>/<site>`, served at `https://<site>.<domain>`; on
+creation, `.env` gets `CONTAINER_NAME=<site>`, `APP_ENV=prod`, `TRAEFIK_HOST=${CONTAINER_NAME}.<domain>` and a
+generated `DB_PASS`. The values are displayed: a site cloned elsewhere gets wrong ones, visible there and caught by
+the network check.
+
+**Framework detection.** `<APP_CODE_PATH>/bin/console` → `symfony`, `<APP_CODE_PATH>/artisan` → `laravel`, otherwise
+`vanilla`.
+
+**Two env files.** `.env` at the root serves the infra (Compose, castor); `code/.env.prod.local` serves the Symfony app
+(compiled by `composer dump-env prod` in the deploy script, which also fixes its `APP_ENV`).
+
+**Secrets.** `DB_PASS` and `APP_SECRET` are hex tokens (`generateToken()`): nothing that breaks a `.env` or the
+`DATABASE_URL`. The files holding them (`.env`, `.env.prod.local`, `.composer-auth.json`) are created readable by
+their owner only (`0600`).
+
+**Enabled** while `APP_ENV` is unset (a fresh clone, no `.env` yet) or `prod`; hidden on a dev machine.
+
+---
 
 ### `deploy` - Deploy Latest Code on the VPS
 
@@ -56,6 +96,9 @@ never ends with a restarted app reported as deployed.
 ## Workflow Example
 
 ```bash
+# 0. A new site on the VPS (see the skeleton README: site-clone)
+castor vps:init      # until everything is ✔
+
 # 1. Local development: push new commits to the VPS remote
 git push vps main
 
