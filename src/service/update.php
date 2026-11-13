@@ -9,10 +9,15 @@ use Castor\Exception\ProblemException;
 use Castor\Helper\PathHelper;
 use Symfony\Component\Dotenv\Dotenv;
 
-use function Castor\context;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\run;
+use function Tapomix\Castor\CastorLock\installOnLockChange;
+use function Tapomix\Castor\CastorLock\lockHash;
+
+// loaded here, not by the presets: a project may import this file alone (the template imports infra/sync.php);
+// require_once, like castor import(), so the file is loaded once whatever the path
+require_once __DIR__ . '/../castor-lock.php';
 
 define('TAPOMIX_NAMESPACE_SERVICE', 'tapomix-service');
 
@@ -33,15 +38,12 @@ function update(): void
     }
 
     // read the lock before the pull, to detect the one the pull is about to bring
-    $castorLockPath = PathHelper::getRoot() . '/.castor/castor.composer.lock';
-    $castorLockBefore = hashFile($castorLockPath);
+    $castorLockBefore = lockHash();
 
     io()->section('Pulling latest code');
     run(['git', 'pull']);
 
-    if ($castorLockBefore !== hashFile($castorLockPath)) {
-        updateCastorTasks();
-    }
+    installOnLockChange($castorLockBefore);
 
     io()->section('Pulling images');
     run(['docker', 'compose', 'pull', '--ignore-buildable']);
@@ -67,42 +69,4 @@ function isComposeFileDefined(array $env, string $dotEnvContent): bool
     $value = $env['COMPOSE_FILE'] ?? new Dotenv()->parse($dotEnvContent)['COMPOSE_FILE'] ?? '';
 
     return '' !== $value;
-}
-
-/**
- * Install the castor tasks the pull brought, as castor will not act on a new lock by itself.
- *
- * Castor reinstalls its own dependencies when the lock "content-hash" stops matching
- * .castor/vendor/composer.installed, and that hash covers castor.composer.json alone: a lock bumped
- * under the same constraint (^0.5: 0.5.0 => 0.5.1) leaves the castor vendor silently stale.
- */
-function updateCastorTasks(): void
-{
-    io()->section('Updating the castor tasks');
-    // the "composer" alias may belong to tapomix-composer, so qualify the command
-    $command = ['castor', 'castor:composer', 'install'];
-
-    // the castor vendor never affects the service: a failure (network, GitHub) must not block its update
-    if (!run($command, context()->withAllowFailure())->isSuccessful()) {
-        io()->warning(\sprintf('Castor tasks not updated, the service update goes on: run "%s" by hand.', \implode(' ', $command)));
-
-        return;
-    }
-
-    // this run already loaded the previous tasks: the new ones apply from the next run
-    io()->note('Castor tasks updated: they apply from the next castor run.');
-}
-
-/**
- * Hash a file, or null when it is absent.
- *
- * Same helper as in the infra tasks, not shared: the service preset does not import them.
- */
-function hashFile(string $path): ?string
-{
-    if (!\is_file($path)) {
-        return null;
-    }
-
-    return \md5_file($path) ?: null;
 }
