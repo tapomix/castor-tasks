@@ -28,8 +28,9 @@ castor vps:init
 
 | Item | When absent | When present |
 | --- | --- | --- |
-| `.env` | copied from `.env.dist`, prefilled (below) | checked: `CONTAINER_NAME` set, `APP_ENV=prod`, `DB_PASS` not `ChangeMe!` |
-| `.castor/.env.castor` | copied from `.env.castor.dist`, `APP_FRAMEWORK` detected | ✔ |
+| `.env` | copied from `.env.dist`, prefilled (below) | checked: `CONTAINER_NAME` set, `APP_ENV=prod`, `TRAEFIK_HOST` with a domain (not `domain.ext`), `DB_PASS` not `ChangeMe!` |
+| `<APP_CODE_PATH>/` | reported: `git submodule update --init` (an uninitialized submodule leaves it empty) | ✔ |
+| `.castor/.env.castor` | copied from `.env.castor.dist`, `APP_FRAMEWORK` detected — waits for the code | ✔ |
 | `compose.override.yaml` | written, comments only | ✔ |
 | `.docker/.composer-auth.json` | `{}` | ✔ |
 | `<APP_CODE_PATH>/.env.prod.local` | Symfony only: a generated `APP_SECRET` — add the project prod values by hand | checked: `APP_SECRET` set and not empty |
