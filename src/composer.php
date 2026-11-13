@@ -7,6 +7,7 @@ namespace Tapomix\Castor\Composer;
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 use Castor\Exception\ProblemException;
+use Castor\Helper\PathHelper;
 
 use function Castor\context;
 use function Castor\variable;
@@ -20,7 +21,67 @@ function exec(
     #[AsRawTokens]
     array $args = [],
 ): void {
-    docker_exec((string) variable('DOCKER.SERVICES.PHP'), ['composer', ...$args]);
+    try {
+        docker_exec((string) variable('DOCKER.SERVICES.PHP'), ['composer', ...$args]);
+    } finally {
+        // a failing command (e.g. a `validate` with warnings) may still have written the files
+        stripComposerJsonFinalNewline();
+    }
+}
+
+/**
+ * Composer always ends `composer.json` with a newline: drop it when the app's `.editorconfig` asks for none.
+ * Run after every command (require, remove, update, bump...): a file Composer did not touch is left as is.
+ */
+function stripComposerJsonFinalNewline(): void
+{
+    $root = PathHelper::getRoot();
+
+    if (!jsonFinalNewlineDisabled($root . '/.editorconfig')) {
+        return;
+    }
+
+    $path = $root . '/' . variable('APP.CODE_PATH') . '/composer.json';
+
+    if (!\is_file($path)) {
+        return;
+    }
+
+    $content = (string) \file_get_contents($path);
+    $stripped = \rtrim($content, "\n");
+
+    if ($stripped !== $content) {
+        \file_put_contents($path, $stripped);
+    }
+}
+
+/**
+ * Whether the `[*.json]` section of the given `.editorconfig` sets `insert_final_newline = false`.
+ * Only that exact section is read: no glob matching, no parent `.editorconfig`.
+ */
+function jsonFinalNewlineDisabled(string $editorConfig): bool
+{
+    if (!\is_file($editorConfig)) {
+        return false;
+    }
+
+    $inJsonSection = false;
+
+    foreach ((array) \file($editorConfig, \FILE_IGNORE_NEW_LINES | \FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = \trim((string) $line);
+
+        if (1 === \preg_match('/^\[(.+)\]$/', $line, $matches)) {
+            $inJsonSection = '*.json' === $matches[1];
+
+            continue;
+        }
+
+        if ($inJsonSection && 1 === \preg_match('/^insert_final_newline\s*=\s*false$/i', $line)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /** @param string[] $args */
