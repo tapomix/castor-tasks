@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.6.1] - 2026-11-13
+
+### Added
+
+- `vps:init` to initialize a freshly cloned site on the VPS: creates what is missing (`.env` prefilled from the
+  `<web>/<domain>/<site>` layout, `.castor/.env.castor` with the detected framework, `compose.override.yaml`,
+  `.docker/.composer-auth.json`, the Symfony `APP_SECRET`, `USER_ID` / `GROUP_ID` of the VPS user), never overwrites,
+  reports every item; secret files `0600`
+
+### Changed
+
+- An unset `APP_ENV` is its own state (`TAPOMIX_ENV_UNDEFINED`), no longer `dev`: the dev tasks are hidden and a site
+  is refused until `APP_ENV` is set
+
+### Fixed
+
+- `generatePassword()` no longer uses `@ # $ % ?`, which broke a `.env` or a `DATABASE_URL`, and picks and shuffles
+  with `random_int()`
+
+---
+
 ## [0.6.0] - 2026-11-13
 
 ### Added
