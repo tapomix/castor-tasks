@@ -65,7 +65,7 @@ class GeneratorTest extends TestCase
     {
         $password = generatePassword();
 
-        $this->assertMatchesRegularExpression('/[!@#$%&*\-_+=?]/', $password);
+        $this->assertMatchesRegularExpression('/[!&*\-_+=]/', $password);
     }
 
     public function testGeneratePasswordIsRandom(): void
@@ -81,8 +81,16 @@ class GeneratorTest extends TestCase
     {
         $password = generatePassword();
 
-        // Should only contain: a-z, A-Z, 0-9, and special chars !@#$%&*-_+=?
-        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9!@#$%&*\-_+=?]+$/', $password);
+        // Should only contain: a-z, A-Z, 0-9, and special chars !&*-_+=
+        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9!&*\-_+=]+$/', $password);
+    }
+
+    public function testGeneratePasswordNeverHoldsEnvOrUrlBreakers(): void
+    {
+        // $ is interpolated by docker compose in .env, % breaks %env(resolve:)%, @ # ? split a DATABASE_URL
+        for ($i = 0; $i < 200; ++$i) {
+            $this->assertDoesNotMatchRegularExpression('/[@#$%?]/', generatePassword());
+        }
     }
 
     // ========== Token Tests ==========

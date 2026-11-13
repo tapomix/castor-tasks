@@ -23,28 +23,38 @@ function generatePassword(int $length = 16): string
     $lowercase = \range('a', 'z');
     $uppercase = \range('A', 'Z');
     $numbers = \range('0', '9');
-    $special = \str_split('!@#$%&*-_+=?');
+    // safe in a .env and in the user info of a URL: no $ (compose interpolation), % (encoding, %env(resolve:)%),
+    // @ # ? (DATABASE_URL delimiters)
+    $special = \str_split('!&*-_+=');
 
     $allCharacters = [...$lowercase, ...$uppercase, ...$numbers, ...$special];
-    $allLength = \count($allCharacters);
 
     // ensure minimum length
     $length = \max(12, $length);
 
-    // generate password ensuring at least one character from each category
-    $password = '';
-    $password .= $lowercase[\random_int(0, \count($lowercase) - 1)];
-    $password .= $uppercase[\random_int(0, \count($uppercase) - 1)];
-    $password .= $numbers[\random_int(0, \count($numbers) - 1)];
-    $password .= $special[\random_int(0, \count($special) - 1)];
-
-    // fill the rest randomly using random_bytes for more entropy
+    // at least one character from each category, the rest from all of them
+    $characters = [pick($lowercase), pick($uppercase), pick($numbers), pick($special)];
     for ($i = 4; $i < $length; ++$i) {
-        $randomIndex = \ord(\random_bytes(1)[0]) % $allLength;
-        $password .= $allCharacters[$randomIndex];
+        $characters[] = pick($allCharacters);
     }
 
-    return \str_shuffle($password);
+    // Fisher-Yates on random_int(): str_shuffle() is not cryptographically secure
+    for ($i = \count($characters) - 1; $i > 0; --$i) {
+        $j = \random_int(0, $i);
+        [$characters[$i], $characters[$j]] = [$characters[$j], $characters[$i]];
+    }
+
+    return \implode('', $characters);
+}
+
+/**
+ * One element, unbiased: random_int(), not a byte modulo the size.
+ *
+ * @param list<string> $characters
+ */
+function pick(array $characters): string
+{
+    return $characters[\random_int(0, \count($characters) - 1)];
 }
 
 #[AsTask(namespace: TAPOMIX_NAMESPACE_TOOLS, description: 'Generate a random password', aliases: ['password'])]
