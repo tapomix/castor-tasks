@@ -75,7 +75,7 @@ use Castor\Helper\PathHelper;
 
 use function Castor\import;
 
-import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/all.php'); // import all tasks
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/php.php'); // import the tasks for a PHP project
 // define('TAPOMIX_APP_ENV_FILE', '.env.docker');
 ```
 
@@ -83,7 +83,9 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/all.php
 
 ### Presets
 
-You don't have to load all tasks. The `presets/` directory contains files with only specific task groups. To use a preset, simply replace the `import` line in your `castor.php` (**replace** `<preset>` with one from the list below):
+The tasks target unrelated projects (PHP apps, the DNS server, the Docker services): each project loads only the
+groups it needs through the `presets/` directory. To use a preset, replace the `import` line in your `castor.php`
+(**replace** `<preset>` with one from the list below):
 
 ```php
 // .castor/castor.php
@@ -96,10 +98,19 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset
 
 | Preset | Description |
 | ------ | ----------- |
-| `all.php` | All tasks |
 | `dns.php` | DNS/DNSSEC tasks only |
 | `infra.php` | Infra sync tasks only |
 | `php.php` | All tasks for a PHP project |
+| `service.php` | Generic Docker service tasks |
+| `traefik.php` | Traefik site tasks, imported with `service.php` |
+
+A Docker service imports `service.php`, plus its own preset when it has one:
+
+```php
+// .castor/castor.php (Traefik)
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/service.php');
+import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/traefik.php');
+```
 
 ### Structure
 
@@ -292,6 +303,24 @@ Update and restart the app on the VPS after new code has been pushed to it.
 
 ```bash
 castor vps:deploy
+```
+
+### ⚙️ [Service Tasks](docs/service.md) (`tapomix-service`)
+
+Update and restart a Docker service (Traefik, diun...) from its directory.
+
+```bash
+castor service:update
+```
+
+### 🔀 [Traefik Tasks](docs/traefik.md) (`tapomix-traefik`)
+
+Declare the site networks of the Traefik reverse proxy.
+
+```bash
+castor traefik:site:add <site>
+castor traefik:site:remove <site>
+castor traefik:site:list
 ```
 
 ### 🔐 [DNS/DNSSEC Tasks](docs/dns.md) (`tapomix-dns`)
