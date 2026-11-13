@@ -89,7 +89,27 @@ function ensureComposerAuthFile(string $root): void
         return;
     }
 
-    if (!\is_dir(\dirname($path)) && !\mkdir(\dirname($path), 0o755, true) || false === \file_put_contents($path, '{}')) {
+    if (!\is_dir(\dirname($path)) && !\mkdir(\dirname($path), 0o755, true)) {
         throw new ProblemException(\sprintf('Unable to create "%s", the build needs it: create it with "{}".', $path));
+    }
+
+    // may later hold private repository tokens
+    writeSecretFile($path, '{}');
+}
+
+/**
+ * Write a file holding secrets, readable by its owner only (0600): the user running docker compose and the builds.
+ * The umask covers the creation itself, no window where the file is world-readable.
+ */
+function writeSecretFile(string $path, string $content): void
+{
+    $umask = \umask(0o077);
+
+    try {
+        if (false === \file_put_contents($path, $content) || !\chmod($path, 0o600)) {
+            throw new ProblemException(\sprintf('Unable to write "%s".', $path));
+        }
+    } finally {
+        \umask($umask);
     }
 }

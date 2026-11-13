@@ -16,7 +16,7 @@ use function Castor\run;
 use function Tapomix\Castor\Docker\validateComposeFile;
 use function Tapomix\Castor\Tools\generateToken;
 
-// TAPOMIX_NAMESPACE_VPS and ensureComposerAuthFile(); require_once, like castor import(), so loaded once
+// TAPOMIX_NAMESPACE_VPS, ensureComposerAuthFile() and writeSecretFile(); require_once, like castor import(), so loaded once
 require_once __DIR__ . '/deploy.php';
 
 /* The machine-local Compose layer, written when absent: COMPOSE_FILE lists it, Compose fails on a missing file. */
@@ -48,7 +48,7 @@ function init(): int
     $dotenvPath = $root . '/' . TAPOMIX_DOTENV_FILE;
     if (!\is_file($dotenvPath)) {
         $values = [...envFromPath($root), 'DB_PASS' => generateToken()];
-        \file_put_contents($dotenvPath, prefillDotenv(readDist($root . '/.env.dist'), $values));
+        writeSecretFile($dotenvPath, prefillDotenv(readDist($root . '/.env.dist'), $values));
         $rows[] = ['.env', \sprintf('created: CONTAINER_NAME=%s, APP_ENV=prod, TRAEFIK_HOST=%s, DB_PASS generated', $values['CONTAINER_NAME'], $values['TRAEFIK_HOST'])];
     }
 
@@ -94,7 +94,7 @@ function init(): int
             $rows[] = [$prodLocal, '✘ ' . $codePath . '/ missing: git submodule update --init'];
             $problems[] = $codePath . '/ missing';
         } elseif (!\is_file($prodLocalPath)) {
-            \file_put_contents($prodLocalPath, 'APP_SECRET=' . generateToken() . "\n");
+            writeSecretFile($prodLocalPath, 'APP_SECRET=' . generateToken() . "\n");
             $rows[] = [$prodLocal, 'created: APP_SECRET generated — add the project prod values by hand'];
         } elseif (!hasAppSecret((string) \file_get_contents($prodLocalPath))) {
             $rows[] = [$prodLocal, '✘ APP_SECRET missing or empty'];

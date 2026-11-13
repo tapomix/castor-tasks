@@ -46,6 +46,14 @@ class DeployTest extends TestCase
         $this->assertSame('{}', file_get_contents($this->root . '/.docker/.composer-auth.json'));
     }
 
+    public function testComposerAuthFileIsReadableByItsOwnerOnly(): void
+    {
+        $root = $this->tempRoot();
+        ensureComposerAuthFile($root);
+
+        $this->assertSame(0o600, fileperms($root . '/.docker/.composer-auth.json') & 0o777);
+    }
+
     private function tempRoot(): string
     {
         $this->root = sys_get_temp_dir() . '/deploy-test-' . uniqid();

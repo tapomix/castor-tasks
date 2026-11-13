@@ -10,6 +10,7 @@ use function Tapomix\Castor\Vps\dotenvProblems;
 use function Tapomix\Castor\Vps\envFromPath;
 use function Tapomix\Castor\Vps\hasAppSecret;
 use function Tapomix\Castor\Vps\prefillDotenv;
+use function Tapomix\Castor\Vps\writeSecretFile;
 
 class InitTest extends TestCase
 {
@@ -121,6 +122,19 @@ class InitTest extends TestCase
     public function testHasNoAppSecret(string $content): void
     {
         $this->assertFalse(hasAppSecret($content));
+    }
+
+    public function testSecretFileIsReadableByItsOwnerOnly(): void
+    {
+        $path = $this->tempDir() . '/.env';
+        writeSecretFile($path, "DB_PASS=abc\n");
+
+        try {
+            $this->assertSame("DB_PASS=abc\n", file_get_contents($path));
+            $this->assertSame(0o600, fileperms($path) & 0o777);
+        } finally {
+            unlink($path);
+        }
     }
 
     private function tempDir(): string
