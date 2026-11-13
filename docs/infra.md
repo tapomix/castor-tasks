@@ -228,7 +228,7 @@ row, and a Symfony project gets no Laravel row.
 
 1. The `${XXX_VERSION:-default}` defaults are collected from `compose.yaml`, `compose.app.yaml` and
    `compose.override.yaml`, in that order: a later file overrides an earlier one, as in compose
-2. A non-empty value in the app env file (`TAPOMIX_APP_ENV_FILE`, default `.env.docker`) overrides the pin
+2. A non-empty value in the `.env` overrides the pin
 
 **Statuses:**
 

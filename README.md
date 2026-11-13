@@ -76,7 +76,6 @@ use Castor\Helper\PathHelper;
 use function Castor\import;
 
 import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/php.php'); // import the tasks for a PHP project
-// define('TAPOMIX_APP_ENV_FILE', '.env.docker');
 ```
 
 **Why not remote-import?** Remote imports change the `workingDirectory` in the context, which we want to avoid.
@@ -100,8 +99,8 @@ import(PathHelper::getCastorVendorDir() . '/tapomix/castor-tasks/presets/<preset
 | ------ | ----------- |
 | `dns.php` | DNS/DNSSEC tasks only |
 | `infra.php` | Infra sync tasks only |
-| `php.php` | PHP project tasks, without `npm`: import `src/node` for it |
-| `service.php` | Generic Docker service tasks, with `check` |
+| `php.php` | PHP site tasks, without `npm`: import `src/node` for it |
+| `service.php` | Docker service tasks (`update`, the docker tasks), with `check` |
 | `traefik.php` | Traefik site tasks, imported with `service.php` |
 
 A Docker service imports `service.php`, plus its own preset when it has one:
@@ -123,12 +122,12 @@ project-root/
 │   ├── .env.castor           # Castor configuration
 │   ├── castor.composer.json  # Package dependencies
 │   └── vendor/               # Installed packages
-├── compose.yaml              # Base compose file (required)
+├── compose.yaml              # Base compose file
 ├── compose.dev.yaml          # Development compose file
 ├── compose.prod.yaml         # Production compose file
-├── compose.app.yaml          # Optional project-wide layer (committed)
-├── compose.override.yaml     # Optional local override (gitignored)
-└── .env(.docker)             # Docker environment variables
+├── compose.app.yaml          # Project-wide layer (committed)
+├── compose.override.yaml     # Machine-local layer (gitignored), comments only when empty
+└── .env                      # App env file: APP_ENV, COMPOSE_FILE, COMPOSE_PROFILES...
 ```
 
 ## Configuration
@@ -144,12 +143,7 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
 | `APP_CODE_PATH` | `code` | Path to application code in container |
-| `APP_DB_NAME` | `DB_NAME`, then `db` | Database name |
-| `APP_DB_USER` | `DB_USER`, then `user` | Database user |
-| `APP_ENVIRONMENT` | `APP_ENV`, then `dev` | Application environment |
 | `APP_FRAMEWORK` | `vanilla` | Framework type (`vanilla`, `symfony`, `laravel`, ...) |
-| `APP_NAME` | `CONTAINER_NAME`, then `app` | Application name |
-| `APP_SERVER_NAME` | `TRAEFIK_HOST`, then `localhost` | Server hostname |
 | `APP_SERVICE_DB` | `db` | Database service name in docker-compose |
 | `APP_SERVICE_NODE` | `node` | Node service name in docker-compose |
 | `APP_SERVICE_PHP` | `php` | PHP service name in docker-compose |
@@ -158,20 +152,14 @@ cp .castor/vendor/tapomix/castor-tasks/dist/.env.dist.castor .castor/.env.castor
 
 ### Environment File Loading Order
 
-1. **App environment file** (`TAPOMIX_APP_ENV_FILE` constant, default: `.env.docker`)
+1. **App environment file** (`.env`, fixed: Compose reads that one)
 2. **Castor environment file** (`.castor/.env.castor`)
 
 The app environment file is always loaded first (if it exists), enabling variable interpolation in the Castor config.
 
-**Infra names by convention:** the app variables (`APP_ENVIRONMENT`, `APP_NAME`, `APP_DB_NAME`, `APP_DB_USER`,
-`APP_SERVER_NAME`) fall back on the names the infra template uses in the app env file (`APP_ENV`, `CONTAINER_NAME`,
-`DB_NAME`, `DB_USER`, `TRAEFIK_HOST`): a project built on the template sets none of them. Set an `APP_*` variable only
-when the app env uses another name, referencing it with `${VAR}`:
-
-```dotenv
-# .castor/.env.castor
-APP_DB_NAME=${DB_DATABASE}
-```
+**One source of truth:** the app variables are read from the infra names of the `.env` only (`APP_ENV`,
+`CONTAINER_NAME`, `DB_NAME`, `DB_USER`, `TRAEFIK_HOST`), the ones Compose uses too: castor and Compose cannot disagree
+on the environment or the database. Since 0.6.0 the `APP_*` overrides of these names are ignored.
 
 ### Overriding the Default Context
 
@@ -207,13 +195,14 @@ Tasks are organized by namespace. Click on each section for detailed documentati
 
 ### 🐳 [Docker Tasks](docs/docker.md) (`tapomix-docker`)
 
-Container orchestration and management.
+Container orchestration, the same commands in the sites and the Docker services (`COMPOSE_FILE` in `.env`).
 
 ```bash
-castor build
-castor start
-castor stop
-castor logs
+castor start   # docker compose up -d, waits for the healthchecks
+castor stop    # docker compose down --remove-orphans
+castor logs    # docker compose logs -f -t
+castor build   # docker compose build --pull
+castor pull    # docker compose pull --ignore-buildable
 castor shell <service>
 ```
 
@@ -307,7 +296,7 @@ castor vps:deploy
 
 ### ⚙️ [Service Tasks](docs/service.md) (`tapomix-service`)
 
-Update and restart a Docker service (Traefik, diun...) from its directory.
+Update and restart a Docker service (Traefik, diun...) from its directory, plus the docker tasks above.
 
 ```bash
 castor service:update

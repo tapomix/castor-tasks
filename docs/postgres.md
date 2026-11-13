@@ -187,25 +187,11 @@ APP_SERVICE_DB=postgres
 
 Configure database connection details:
 
-Read from `DB_NAME` and `DB_USER` in the app env file; override them in `.castor/.env.castor` only when the app env
-uses other names:
-
-```bash
-# Database name
-APP_DB_NAME=myapp_db
-
-# Database user
-APP_DB_USER=myapp_user
-```
+Read from `DB_NAME` and `DB_USER` in the `.env`, the names Compose uses for the database container.
 
 ### Application Name
 
-The application name is used in backup file naming. Read from `CONTAINER_NAME` in the app env file, `APP_NAME`
-overrides it:
-
-```bash
-APP_NAME=myapp
-```
+The application name is used in backup file naming, read from `CONTAINER_NAME` in the `.env`.
 
 ### Backup Directory Structure
 

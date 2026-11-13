@@ -32,8 +32,9 @@ castor vps:deploy
 1. `git pull` on the app's root repo
 2. `castor castor:composer install` — only when the pull brought a new `.castor/castor.composer.lock`
 3. `git submodule update --init --recursive` — only if the project uses a submodule (`.gitmodules` present); skipped when the app code lives directly at the repo root
-4. Pull the non-buildable images (equivalent to `castor tapomix-docker:pull`)
-5. Rebuild all Docker images, base images pulled (equivalent to `castor build`)
+4. Pull the non-buildable images (equivalent to `castor pull`)
+5. Rebuild all Docker images, base images pulled (equivalent to `castor build`), after creating
+   `.docker/.composer-auth.json` (`{}`) when absent: a build secret of `compose.prod.yaml`
 6. Restart all containers (equivalent to `castor stop` then `castor start`)
 7. Run pending migrations, based on `APP.FRAMEWORK`:
    - Symfony → `doctrine:migrations:migrate --no-interaction`
@@ -48,7 +49,7 @@ and goes on.
 The task stops at the first failing step and exits non-zero: a failed `git pull`, build or migration
 never ends with a restarted app reported as deployed.
 
-**Requires:** `APP_ENV=prod` in the app env file (or the `APP_ENVIRONMENT` override) — the task is only enabled when running against a production environment, to prevent an accidental run against a local/dev setup.
+**Requires:** `APP_ENV=prod` in the `.env` — the task is only enabled when running against a production environment, to prevent an accidental run against a local/dev setup.
 
 ---
 

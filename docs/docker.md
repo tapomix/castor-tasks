@@ -6,26 +6,51 @@ Docker Compose orchestration and container management tasks.
 
 ## Prerequisites
 
-Your project must follow this Docker Compose file structure:
+The tasks run a plain `docker compose`, without `-f`, `--profile` or `--env-file`: the project `.env` declares the
+compose files (`COMPOSE_FILE`) and the profiles (`COMPOSE_PROFILES`). A hand-typed `docker compose` at the project
+root therefore sees the same config as the tasks. Shared by the sites (`php` preset) and the Docker services
+(`service` preset).
+
+**A site** loads four fixed levels, the same line on every machine:
+
+```dotenv
+# .env
+APP_ENV=dev # dev | prod
+COMPOSE_PROFILES=${APP_ENV}
+COMPOSE_FILE=compose.yaml:compose.${APP_ENV}.yaml:compose.app.yaml:compose.override.yaml
+```
 
 ```tree
 project-root/
-├── compose.yaml           # Base compose file (required)
-├── compose.dev.yaml       # Development compose file (required in dev)
-├── compose.prod.yaml      # Production compose file (required in prod)
-├── compose.app.yaml       # Optional project-wide layer (committed)
-├── compose.override.yaml  # Optional local overrides (gitignored)
-└── .env(.docker)          # Docker environment variables (required)
+├── compose.yaml           # base
+├── compose.dev.yaml       # dev
+├── compose.prod.yaml      # prod
+├── compose.app.yaml       # project-wide layer (committed)
+├── compose.override.yaml  # machine-local layer (gitignored), required: comments only when empty
+└── .env                   # app env file, fixed name
 ```
 
-The tasks automatically:
+**A service** lists its own files, e.g. `COMPOSE_FILE=compose.yaml:compose.override.yaml`.
 
-- Load the base `compose.yaml` file
-- Load environment-specific compose file based on `APP.ENVIRONMENT` (`APP_ENV` in the app env file)
-- Load `compose.app.yaml` if it exists
-- Load `compose.override.yaml` if it exists
-- Pass `--profile <APP.ENVIRONMENT>` to every command
-- Use the environment file defined in `DOCKER.ENV_FILE` (default: `.env.docker`)
+### Validation
+
+Compose loads what `COMPOSE_FILE` lists and silently ignores the rest. Before any compose command, after the
+`${APP_ENV}` interpolation, the tasks (and `castor check`) stop with the expected value when:
+
+- `COMPOSE_FILE` is not set, in any project;
+- for a site (the `php` preset defines `TAPOMIX_PROJECT_SITE`): `COMPOSE_FILE` is not exactly the four levels above,
+  or `COMPOSE_PROFILES` differs from `APP_ENV`.
+
+| Mistake | Caught by |
+| --- | --- |
+| A listed file absent from disk (`compose.override.yaml`) | Compose |
+| A file missing from a site `COMPOSE_FILE`, wrong order, wrong env file | The tasks |
+| `COMPOSE_FILE` / `COMPOSE_PROFILES` not set | The tasks |
+
+A value exported in the shell wins over `.env`, for Compose as for the validation.
+
+The tasks run Compose with the project root as working directory: they work from a subdirectory (`code/`), where a
+hand-typed `docker compose` finds `compose.yaml` but skips `.env`.
 
 ### Layer order
 
@@ -50,13 +75,9 @@ services:
     # ...
 ```
 
-Every task passes `--profile <APP.ENVIRONMENT>`, so profiled services follow the whole
-lifecycle — a `stop` tears down what a `start` created. Services with no `profiles` key are
+`COMPOSE_PROFILES=${APP_ENV}` activates them for every command, so profiled services follow the
+whole lifecycle — a `stop` tears down what a `start` created. Services with no `profiles` key are
 always active.
-
-> ⚠️ The profile is always the value of `APP.ENVIRONMENT`, i.e. `dev` or `prod` in a standard
-> setup. A project using a third environment (`staging`, `test`, ...) will not activate
-> `dev`- or `prod`-profiled services.
 
 ## Available Tasks
 
@@ -90,12 +111,12 @@ castor build --no-pull
 
 Pull the latest versions of all images defined in your compose files.
 
-**Aliases:** `tapomix-docker:pull`
+**Aliases:** `tapomix-docker:pull`, `pull`
 
 **Usage:**
 
 ```bash
-castor tapomix-docker:pull
+castor pull
 ```
 
 **Note:** This command uses `--ignore-buildable` to only pull images that are not built locally.
@@ -122,7 +143,7 @@ castor start -u
 
 **Options:**
 
-- `--update` / `-u` - Pull and build the images before starting (equivalent to `castor tapomix-docker:pull` then `castor build`)
+- `--update` / `-u` - Pull and build the images before starting (equivalent to `castor pull` then `castor build`)
 
 **Behavior:**
 
@@ -208,31 +229,25 @@ The following helper functions are available for use in your custom tasks:
 
 ### `buildBaseDockerComposeCmd()`
 
-Builds the base docker-compose command with all configuration files and environment variables.
+Validates `COMPOSE_FILE` (see [Validation](#validation)) and returns the base command.
 
-**Returns:** `string[]` - Array of command parts
+**Returns:** `string[]` - `['docker', 'compose']`
 
-**Behavior:**
-
-1. Checks for required files (environment-specific compose file and env file)
-2. Creates `.docker/.composer-auth.json` if in production mode and file doesn't exist
-3. Builds command with:
-   - `compose.yaml` (base)
-   - `compose.{environment}.yaml` (environment-specific)
-   - `compose.override.yaml` (if exists)
-   - `--env-file={DOCKER.ENV_FILE}`
+Run it through `composeContext()`, which sets the project root as working directory: Compose reads `.env` and
+resolves `COMPOSE_FILE` from there.
 
 **Example usage in custom task:**
 
 ```php
-use function Tapomix\Castor\Docker\buildBaseDockerComposeCmd;
 use function Castor\run;
+use function Tapomix\Castor\Docker\buildBaseDockerComposeCmd;
+use function Tapomix\Castor\Docker\composeContext;
 
 #[AsTask()]
 function my_docker_task(): void
 {
     $cmd = [...buildBaseDockerComposeCmd(), 'cmd', '--args'];
-    run($cmd);
+    run($cmd, context: composeContext());
 }
 ```
 
@@ -275,8 +290,7 @@ function my_task(): void
 **Docker command generated:**
 
 ```bash
-docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
-    run --rm php php -v
+docker compose run --rm php php -v   # from the project root
 ```
 
 ---
@@ -322,12 +336,10 @@ function my_task(): void
 **Docker command generated:**
 
 ```bash
-docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
-    exec php composer install
+docker compose exec php composer install   # from the project root
 
 # with env: ['XDEBUG_MODE' => 'coverage']
-docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
-    exec -e XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text
+docker compose exec -e XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text
 ```
 
 ---
@@ -336,11 +348,8 @@ docker compose -f compose.yaml -f compose.dev.yaml --env-file=.env.docker \
 
 ### Required Environment Variables
 
-Set in your app's environment file (default: `.env.docker`):
-
-```bash
-APP_ENV=dev  # or prod, staging, etc. (APP_ENVIRONMENT in .castor/.env.castor overrides it)
-```
+Set in the project `.env`: `APP_ENV`, `COMPOSE_FILE` and, for a site, `COMPOSE_PROFILES` (see
+[Prerequisites](#prerequisites)).
 
 ### Optional Context Variables
 
@@ -357,8 +366,9 @@ APP_SERVICE_PHP=phpfpm
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| `DOCKER.ENV_FILE` | `.env.docker` | Path to Docker environment file |
-| `APP.ENVIRONMENT` | `dev` | Application environment (determines which compose file to load) |
+| `APP.ENVIRONMENT` | `APP_ENV`, then `dev` | Application environment (expected env level of a site) |
+| `COMPOSE.FILE` | `COMPOSE_FILE`, then empty | Validated compose files |
+| `COMPOSE.PROFILES` | `COMPOSE_PROFILES`, then empty | Validated profiles of a site |
 | `DOCKER.SERVICES.DB` | `db` | Database service name |
 | `DOCKER.SERVICES.NODE` | `node` | Node service name |
 | `DOCKER.SERVICES.PHP` | `php` | PHP service name |

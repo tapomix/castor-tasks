@@ -15,19 +15,22 @@ APP_ENV=prod
 COMPOSE_FILE=compose.yaml:compose.${APP_ENV}.yaml
 ```
 
-> [!WARNING]
-> Unlike the `tapomix-docker` tasks, built for the sites, these tasks never add compose files on their own: a file
-> missing from `COMPOSE_FILE` is simply ignored. `update` refuses to run when `COMPOSE_FILE` is not set at all (neither
-> in the environment nor in the `.env`): `docker compose` would silently load `compose.yaml` alone.
-
-No `.castor/.env.castor` is needed: the castor context reads the `.env` of the service, declared in its `castor.php`:
-
-```php
-// .castor/castor.php
-define('TAPOMIX_APP_ENV_FILE', '.env');
-```
+The validation is shared with the docker tasks (see [docs/docker.md](docker.md#validation)): a service lists its own
+files, only an unset `COMPOSE_FILE` is refused. The castor context reads the `.env` of the service; no
+`.castor/.env.castor` is needed.
 
 ## Available Tasks
+
+The `service` preset also brings the [docker tasks](docker.md), the same commands as the sites:
+
+```bash
+castor start   # up -d, waits for the healthchecks
+castor stop    # down --remove-orphans
+castor logs    # follow, with timestamps
+castor build   # pulls the base images
+castor pull    # non-buildable images
+castor shell <service>
+```
 
 ### `update` - Update a Service
 

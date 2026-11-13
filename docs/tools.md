@@ -131,15 +131,7 @@ CASTOR_DEFAULT_BROWSER=chromium
 
 ### Server Name
 
-The browser task uses the application server name, read from `TRAEFIK_HOST` in the app env file. `APP_SERVER_NAME`
-overrides it:
-
-```bash
-# Set server hostname
-APP_SERVER_NAME=localhost
-# or
-APP_SERVER_NAME=myapp.local
-```
+The browser task uses the application server name, read from `TRAEFIK_HOST` in the `.env`.
 
 ### Context Variables Used
 
