@@ -10,7 +10,9 @@ use function Tapomix\Castor\Vps\detectFramework;
 use function Tapomix\Castor\Vps\dotenvProblems;
 use function Tapomix\Castor\Vps\envFromPath;
 use function Tapomix\Castor\Vps\hasAppSecret;
+use function Tapomix\Castor\Vps\networkState;
 use function Tapomix\Castor\Vps\prefillDotenv;
+use function Tapomix\Castor\Vps\userProblems;
 use function Tapomix\Castor\Vps\writeSecretFile;
 
 class InitTest extends TestCase
@@ -131,6 +133,41 @@ class InitTest extends TestCase
         touch($this->tempDir() . '/artisan');
 
         $this->assertTrue(codeCheckedOut($this->dir));
+    }
+
+    public function testUserMatchingTheVpsUserHasNoProblem(): void
+    {
+        $this->assertSame([], userProblems(['USER_ID' => '1001', 'GROUP_ID' => '1001'], 1001, 1001));
+    }
+
+    public function testUserOfAnotherMachineIsAProblem(): void
+    {
+        // the .env.dist default: the container would not own the files of the VPS user
+        $this->assertSame(
+            ['USER_ID is "1000", expected "1001" (the user running castor)', 'GROUP_ID is "1000", expected "1001" (the user running castor)'],
+            userProblems(['USER_ID' => '1000', 'GROUP_ID' => '1000'], 1001, 1001),
+        );
+    }
+
+    public function testUnsetUserIsAProblem(): void
+    {
+        $this->assertSame(['USER_ID is not set', 'GROUP_ID is not set'], userProblems([], 1001, 1001));
+    }
+
+    public function testNetworkPresent(): void
+    {
+        $this->assertSame('present', networkState(true, ''));
+    }
+
+    public function testNetworkMissing(): void
+    {
+        $this->assertSame('missing', networkState(false, 'Error response from daemon: network traefik-demo not found'));
+    }
+
+    public function testDockerUnavailableIsNotAMissingNetwork(): void
+    {
+        $this->assertSame('docker-unavailable', networkState(false, 'failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running'));
+        $this->assertSame('docker-unavailable', networkState(false, 'permission denied while trying to connect to the Docker daemon socket'));
     }
 
     public function testHasAppSecret(): void

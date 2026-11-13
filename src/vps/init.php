@@ -41,30 +41,44 @@ function init(): int
     io()->title('Initializing the site');
 
     $root = PathHelper::getRoot();
+    [$uid, $gid] = currentUser();
     $rows = [];
     $problems = [];
 
-    // 1. the infra .env, prefilled from the VPS layout
+    // 1. the infra .env, prefilled from the VPS layout and the user running castor
     $dotenvPath = $root . '/' . TAPOMIX_DOTENV_FILE;
+    $created = null;
     if (!\is_file($dotenvPath)) {
-        $values = [...envFromPath($root), 'DB_PASS' => generateToken()];
-        writeSecretFile($dotenvPath, prefillDotenv(readDist($root . '/.env.dist'), $values));
-        $rows[] = ['.env', \sprintf('created: CONTAINER_NAME=%s, APP_ENV=prod, TRAEFIK_HOST=%s, DB_PASS generated', $values['CONTAINER_NAME'], $values['TRAEFIK_HOST'])];
+        try {
+            $values = [...envFromPath($root), 'DB_PASS' => generateToken(), 'USER_ID' => (string) $uid, 'GROUP_ID' => (string) $gid];
+            writeSecretFile($dotenvPath, prefillDotenv(readDist($root . '/.env.dist'), $values));
+            $created = \sprintf('created: CONTAINER_NAME=%s, APP_ENV=prod, TRAEFIK_HOST=%s, USER_ID:GROUP_ID=%d:%d, DB_PASS generated', $values['CONTAINER_NAME'], $values['TRAEFIK_HOST'], $uid, $gid);
+        } catch (ProblemException $problemException) {
+            $rows[] = ['.env', '✘ ' . $problemException->getMessage()];
+            $problems[] = $problemException->getMessage();
+        }
     }
 
-    $env = parseDotenv($dotenvPath);
-    $envProblems = dotenvProblems($env);
-    if (!\array_key_exists(0, $rows)) {
-        $rows[] = ['.env', [] === $envProblems ? '✔' : '✘ ' . \implode(', ', $envProblems)];
+    $env = \is_file($dotenvPath) ? parseDotenv($dotenvPath) : [];
+    if (\is_file($dotenvPath)) {
+        $envProblems = [...dotenvProblems($env), ...userProblems($env, $uid, $gid)];
+        $state = [] === $envProblems ? '✔' : '✘ ' . \implode(', ', $envProblems);
+        $rows[] = ['.env', null === $created ? $state : $created . ([] === $envProblems ? '' : ' — ' . $state)];
+        $problems = [...$problems, ...$envProblems];
     }
-
-    $problems = [...$problems, ...$envProblems];
 
     // 2. the code, then the castor .env with the framework detected from it
     $castorEnvPath = $root . '/' . TAPOMIX_CASTOR_ENV_FILE;
     $castorEnvExists = \is_file($castorEnvPath);
-    $castorSource = $castorEnvExists ? (string) \file_get_contents($castorEnvPath) : readDist($castorEnvPath . '.dist');
-    $codePath = ((new Dotenv()->parse($castorSource)['APP_CODE_PATH'] ?? '') ?: 'code');
+    $castorSource = null;
+    try {
+        $castorSource = $castorEnvExists ? (string) \file_get_contents($castorEnvPath) : readDist($castorEnvPath . '.dist');
+    } catch (ProblemException $problemException) {
+        $rows[] = ['.castor/.env.castor', '✘ ' . $problemException->getMessage()];
+        $problems[] = $problemException->getMessage();
+    }
+
+    $codePath = ((new Dotenv()->parse($castorSource ?? '')['APP_CODE_PATH'] ?? '') ?: 'code');
     $codeReady = codeCheckedOut($root . '/' . $codePath);
 
     if (!$codeReady) {
@@ -73,14 +87,16 @@ function init(): int
         $problems[] = $codePath . '/ not checked out';
     }
 
-    if ($castorEnvExists) {
-        $rows[] = ['.castor/.env.castor', '✔'];
-    } elseif ($codeReady) {
-        $framework = detectFramework($root . '/' . $codePath);
-        \file_put_contents($castorEnvPath, prefillDotenv($castorSource, ['APP_FRAMEWORK' => $framework]));
-        $rows[] = ['.castor/.env.castor', \sprintf('created: APP_FRAMEWORK=%s (detected)', $framework)];
-    } else {
-        $rows[] = ['.castor/.env.castor', '✘ waits for ' . $codePath . '/: the framework is detected from it'];
+    if (null !== $castorSource) {
+        if ($castorEnvExists) {
+            $rows[] = ['.castor/.env.castor', '✔'];
+        } elseif ($codeReady) {
+            $framework = detectFramework($root . '/' . $codePath);
+            \file_put_contents($castorEnvPath, prefillDotenv($castorSource, ['APP_FRAMEWORK' => $framework]));
+            $rows[] = ['.castor/.env.castor', \sprintf('created: APP_FRAMEWORK=%s (detected)', $framework)];
+        } else {
+            $rows[] = ['.castor/.env.castor', '✘ waits for ' . $codePath . '/: the framework is detected from it'];
+        }
     }
 
     $castorEnv = \is_file($castorEnvPath) ? parseDotenv($castorEnvPath) : [];
@@ -111,13 +127,17 @@ function init(): int
         }
     }
 
-    // 5. the compose files, as the docker tasks will check them
-    try {
-        validateComposeFile($env['COMPOSE_FILE'] ?? '', $env['COMPOSE_PROFILES'] ?? '', $env['APP_ENV'] ?? '', true);
-        $rows[] = ['COMPOSE_FILE', '✔'];
-    } catch (ProblemException $problemException) {
-        $rows[] = ['COMPOSE_FILE', '✘ ' . $problemException->getMessage()];
-        $problems[] = $problemException->getMessage();
+    // 5. the compose files, as the docker tasks will check them — an unset APP_ENV is already reported above
+    if ('' === ($env['APP_ENV'] ?? '')) {
+        $rows[] = ['COMPOSE_FILE', '✘ waits for APP_ENV'];
+    } else {
+        try {
+            validateComposeFile($env['COMPOSE_FILE'] ?? '', $env['COMPOSE_PROFILES'] ?? '', $env['APP_ENV'], true);
+            $rows[] = ['COMPOSE_FILE', '✔'];
+        } catch (ProblemException $problemException) {
+            $rows[] = ['COMPOSE_FILE', '✘ ' . $problemException->getMessage()];
+            $problems[] = $problemException->getMessage();
+        }
     }
 
     // 6. the site network, declared on the Traefik side
@@ -125,18 +145,25 @@ function init(): int
     if ('' !== $containerName) {
         $network = 'traefik-' . $containerName;
         $inspect = run(['docker', 'network', 'inspect', $network], context()->withQuiet()->withAllowFailure());
-        if ($inspect->isSuccessful()) {
-            $rows[] = ['network ' . $network, '✔'];
-        } else {
-            $rows[] = ['network ' . $network, \sprintf('✘ missing: castor traefik:site:add %s [--puppeteer] in Traefik, push, castor service:update on the VPS', $containerName)];
-            $problems[] = 'network ' . $network . ' missing';
+        switch (networkState($inspect->isSuccessful(), $inspect->getErrorOutput())) {
+            case 'present':
+                $rows[] = ['network ' . $network, '✔'];
+                break;
+            case 'missing':
+                $rows[] = ['network ' . $network, \sprintf('✘ missing: castor traefik:site:add %s [--puppeteer] in Traefik, push, castor service:update on the VPS', $containerName)];
+                $problems[] = 'network ' . $network . ' missing';
+                break;
+            default:
+                $error = \strtok(\trim($inspect->getErrorOutput()), "\n") ?: 'no output';
+                $rows[] = ['network ' . $network, '✘ docker unavailable: ' . $error];
+                $problems[] = 'docker unavailable (daemon, or the user not in the docker group)';
         }
     }
 
     io()->table(['Item', 'State'], $rows);
 
     if ([] !== $problems) {
-        io()->error(['Fix these, then run castor vps:init again:', ...$problems]);
+        io()->error(['Fix these, then run castor vps:init again:', ...\array_values(\array_unique($problems))]);
 
         return 1;
     }
@@ -144,6 +171,55 @@ function init(): int
     io()->success('Site ready. Next step: castor vps:deploy');
 
     return 0;
+}
+
+/**
+ * The user running castor: the container runs as USER_ID:GROUP_ID and must own the files of the bind mounts.
+ *
+ * @return array{int, int}
+ */
+function currentUser(): array
+{
+    if (\function_exists('posix_getuid') && \function_exists('posix_getgid')) {
+        return [\posix_getuid(), \posix_getgid()];
+    }
+
+    $id = static fn (string $flag): int => (int) run(['id', $flag], context()->withQuiet())->getOutput();
+
+    return [$id('-u'), $id('-g')];
+}
+
+/**
+ * USER_ID / GROUP_ID against the user running castor on the VPS.
+ *
+ * @param array<string, string> $env
+ *
+ * @return list<string>
+ */
+function userProblems(array $env, int $uid, int $gid): array
+{
+    $problems = [];
+
+    foreach (['USER_ID' => $uid, 'GROUP_ID' => $gid] as $key => $expected) {
+        $value = $env[$key] ?? '';
+        if ('' === $value) {
+            $problems[] = $key . ' is not set';
+        } elseif ((string) $expected !== $value) {
+            $problems[] = \sprintf('%s is "%s", expected "%d" (the user running castor)', $key, $value, $expected);
+        }
+    }
+
+    return $problems;
+}
+
+/** `present`, `missing` or `docker-unavailable`: a failing inspect is not always a missing network. */
+function networkState(bool $successful, string $errorOutput): string
+{
+    if ($successful) {
+        return 'present';
+    }
+
+    return \str_contains($errorOutput, 'not found') || \str_contains($errorOutput, 'No such network') ? 'missing' : 'docker-unavailable';
 }
 
 /** A `.dist` file to copy: its absence is a broken checkout, not something to work around. */
