@@ -26,13 +26,23 @@ function check(): void
 
     io()->title('Checking env files');
 
-    checkFiles([
-        // 'label' => 'file path'
-        'app' => variable('DOCKER.ENV_FILE'),
-        'castor' => TAPOMIX_CASTOR_ENV_FILE,
-    ]);
+    checkFiles(requiredEnvFiles((string) variable('DOCKER.ENV_FILE')));
+
+    if (!fs()->exists(PathHelper::getRoot() . '/' . TAPOMIX_CASTOR_ENV_FILE)) {
+        io()->note(\sprintf('No castor file "%s": optional, the defaults apply.', TAPOMIX_CASTOR_ENV_FILE));
+    }
 
     io()->success('Requirements OK');
+}
+
+/**
+ * The castor env file is optional, as in the default context: a Docker service has none.
+ *
+ * @return array<string, string> label => file path
+ */
+function requiredEnvFiles(string $appEnvFile): array
+{
+    return ['app' => $appEnvFile];
 }
 
 /** @param array<string, string> $executables */
