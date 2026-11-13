@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.5.0] - 2026-11-13
+
+### Added
+
+- `service:update` to update a Docker service (pull, build, recreate), relying on `COMPOSE_FILE`
+- `traefik:site:add|remove|list` to manage the Traefik site networks in `compose.sites.yaml`
+- `service` and `traefik` presets
+- `service:update` stops when `COMPOSE_FILE` is not set
+
+### Changed
+
+- App variables read from the infra names by convention (`APP_ENV`, `CONTAINER_NAME`...), `APP_*` as overrides
+- `check` is part of the `php` and `service` presets
+- `check` no longer requires `.castor/.env.castor`
+- Updated Composer dependencies
+
+### Removed
+
+- **Breaking:** the `all` preset, switch to `presets/php.php`
+
+---
+
 ## [0.4.2] - 2026-11-06
 
 ### Changed
