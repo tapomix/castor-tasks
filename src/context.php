@@ -7,10 +7,8 @@ namespace Tapomix\Castor;
 use Castor\Attribute\AsContext;
 use Castor\Context;
 use Castor\Helper\PathHelper;
+use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Process\Process;
-
-use function Castor\fs;
-use function Castor\load_dot_env;
 
 /* The app env file, fixed: Compose reads `.env` by itself, castor must read the same one. */
 define('TAPOMIX_DOTENV_FILE', '.env');
@@ -26,18 +24,7 @@ define('EXPR_ENV_PROD', "context(constant('TAPOMIX_DEFAULT_CONTEXT'))['APP.ENVIR
 #[AsContext(name: TAPOMIX_DEFAULT_CONTEXT)] // don't defined as default to allow override
 function default_context(): Context
 {
-    $root = PathHelper::getRoot();
-
-    // load app env first to enable variable interpolation
-    $appEnvFile = $root . '/' . TAPOMIX_DOTENV_FILE;
-    if (fs()->exists($appEnvFile)) {
-        load_dot_env($appEnvFile);
-    }
-
-    $castorEnvFile = $root . '/' . TAPOMIX_CASTOR_ENV_FILE;
-    if (fs()->exists($castorEnvFile)) {
-        load_dot_env($castorEnvFile);
-    }
+    loadEnvFiles(PathHelper::getRoot());
 
     $data = [
         // from castor specific env vars
@@ -59,6 +46,28 @@ function default_context(): Context
         data: $data,
         tty: hasControllingTty(),
     );
+}
+
+/**
+ * Load `.env` as Compose reads it, then the castor file.
+ *
+ * Plain Dotenv::load(), not castor's load_dot_env() (Dotenv::loadEnv()): that one defaults APP_ENV to `dev` and stacks
+ * `.env.local` / `.env.<env>`, so castor would run a dev config where Compose fails on a missing APP_ENV. The castor
+ * file only adds variables: it may interpolate the `.env` ones, never replace them. An exported variable wins over
+ * both, as for Compose. Plain is_file(): usable without a booted castor container.
+ */
+function loadEnvFiles(string $root): void
+{
+    $dotenv = new Dotenv();
+
+    foreach ([TAPOMIX_DOTENV_FILE, TAPOMIX_CASTOR_ENV_FILE] as $file) {
+        if (\is_file($root . '/' . $file)) {
+            $dotenv->load($root . '/' . $file);
+        }
+
+        // forget which variables Dotenv loaded: the next file sees them as pre-existing, never overridden
+        unset($_SERVER['SYMFONY_DOTENV_VARS'], $_ENV['SYMFONY_DOTENV_VARS']);
+    }
 }
 
 /**
