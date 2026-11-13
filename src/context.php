@@ -55,18 +55,32 @@ function default_context(): Context
         'DOCKER.SERVICES.NODE' => $_SERVER['APP_SERVICE_NODE'] ?? 'node',
         'DOCKER.SERVICES.PHP' => $_SERVER['APP_SERVICE_PHP'] ?? 'php',
 
-        // from app specific env vars
-        'APP.DB.NAME' => $_SERVER['APP_DB_NAME'] ?? 'db',
-        'APP.DB.USER' => $_SERVER['APP_DB_USER'] ?? 'user',
-        'APP.ENVIRONMENT' => $_SERVER['APP_ENVIRONMENT'] ?? 'dev',
-        'APP.NAME' => $_SERVER['APP_NAME'] ?? 'app',
-        'APP.SERVER_NAME' => $_SERVER['APP_SERVER_NAME'] ?? 'localhost',
+        ...appContextData($_SERVER),
     ];
 
     return new Context(
         data: $data,
         tty: hasControllingTty(),
     );
+}
+
+/**
+ * App variables, read from the infra names of the app env file by convention.
+ * The `APP_*` variables override them, for an app env that uses other names.
+ *
+ * @param array<string, mixed> $env
+ *
+ * @return array<string, mixed>
+ */
+function appContextData(array $env): array
+{
+    return [
+        'APP.DB.NAME' => $env['APP_DB_NAME'] ?? $env['DB_NAME'] ?? 'db',
+        'APP.DB.USER' => $env['APP_DB_USER'] ?? $env['DB_USER'] ?? 'user',
+        'APP.ENVIRONMENT' => $env['APP_ENVIRONMENT'] ?? $env['APP_ENV'] ?? 'dev',
+        'APP.NAME' => $env['APP_NAME'] ?? $env['CONTAINER_NAME'] ?? 'app',
+        'APP.SERVER_NAME' => $env['APP_SERVER_NAME'] ?? $env['TRAEFIK_HOST'] ?? 'localhost',
+    ];
 }
 
 /**
