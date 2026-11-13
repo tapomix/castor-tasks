@@ -41,6 +41,14 @@ The task passes all arguments directly to Composer inside the container:
 docker compose (...options...) exec php composer install
 ```
 
+**Final newline of `composer.json`:**
+
+Composer always ends `composer.json` with a newline. When the app's `.editorconfig` sets
+`insert_final_newline = false` in its `[*.json]` section, the task removes that newline from
+`<APP_CODE_PATH>/composer.json` after every command, even a failing one (`composer:dev` and `composer:global`
+included). `composer.lock` is left as Composer writes it. Only the exact `[*.json]` section of the root
+`.editorconfig` is read.
+
 ---
 
 ### `composer:dev` - Execute Composer Command with --dev

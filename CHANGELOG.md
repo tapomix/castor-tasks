@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- `composer` removes the final newline Composer writes in `composer.json` when the `[*.json]` section of the app's
+  `.editorconfig` sets `insert_final_newline = false`
+
 - `build` and `service:update` skip the build of an image-only project instead of the Compose warning
   "No services to build"
 
