@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.6.0] - 2026-11-13
+
+### Added
+
+- The `service` preset brings the docker tasks: `start`, `stop`, `logs`, `build`, `pull`, `shell` in every service
+- `pull` alias for `tapomix-docker:pull`
+- `check` validates `COMPOSE_FILE`
+- `vps:deploy` creates `.docker/.composer-auth.json` before the build
+
+### Changed
+
+- **Breaking:** the docker tasks run a plain `docker compose` from the project root: the compose files come from
+  `COMPOSE_FILE` in `.env`, no more `-f`, `--profile` or `--env-file`. `COMPOSE_FILE` is required everywhere; a site
+  must set exactly `compose.yaml:compose.${APP_ENV}.yaml:compose.app.yaml:compose.override.yaml` and
+  `COMPOSE_PROFILES=${APP_ENV}`, and `compose.override.yaml` must exist (comments only when empty)
+- **Breaking:** the app env file is `.env`, fixed: `TAPOMIX_APP_ENV_FILE` and `DOCKER.ENV_FILE` are gone
+- **Breaking:** `.env` is read as Compose reads it: no `APP_ENV` default (a site without it is refused), no
+  `.env.local` / `.env.<env>`; `.castor/.env.castor` only adds variables, it never replaces a `.env` one
+- **Breaking:** the `APP_ENVIRONMENT`, `APP_NAME`, `APP_DB_NAME`, `APP_DB_USER` and `APP_SERVER_NAME` overrides are
+  ignored: the infra names of `.env` only
+- `getContainerPhpVersion()` moved to the composer helpers
+- `service:update` validates `COMPOSE_FILE` through the docker tasks
+
+### Migration
+
+A site:
+
+1. `infra:sync` from the template, review, commit
+2. `castor castor:composer update` (`^0.6`), commit the lock
+3. Locally and on the VPS: add the `COMPOSE_FILE` line to `.env` (from `.env.dist`), create `compose.override.yaml`
+   when absent; a project still on the old `.env.docker` default renames it `.env`
+4. Optional: drop the `APP_*` lines of `.castor/.env.castor`
+5. On the VPS, after step 3: `castor vps:deploy`. The running version keeps its `-f` flags, which override
+   `COMPOSE_FILE`; the constraint change makes castor reinstall its vendor on the next run
+
+A Docker service: `COMPOSE_FILE` in `.env`, `^0.6`, then `castor service:update` on the VPS.
+
+---
+
 ## [0.5.2] - 2026-11-13
 
 ### Added
