@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- `build` and `service:update` skip the build of an image-only project instead of the Compose warning
+  "No services to build"
+
+---
+
 ## [0.6.1] - 2026-11-13
 
 ### Added

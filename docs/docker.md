@@ -83,7 +83,8 @@ always active.
 
 ### `build` - Build All Services
 
-Build all Docker services defined in your compose files.
+Build all Docker services defined in your compose files. Skipped with a note when no service has a `build` key
+(an image-only service), where Compose would only warn "No services to build".
 
 **Aliases:** `tapomix-docker:build`, `build`
 

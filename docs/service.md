@@ -48,7 +48,7 @@ castor service:update
 2. `git pull`
 3. `castor castor:composer install`, only when the pull brought a new `.castor/castor.composer.lock`
 4. `docker compose pull --ignore-buildable`
-5. `docker compose build --pull` (nothing to do for an image-only service)
+5. `docker compose build --pull`, skipped for an image-only service (no `build` key: Compose would only warn "No services to build")
 6. `docker compose up --detach --wait --force-recreate`
 
 The containers are **always recreated**: Compose does not watch the content of the mounted config files, so a plain
