@@ -14,6 +14,7 @@ import(__DIR__ . '/../src/qa');
 import(__DIR__ . '/../src/symfony');
 import(__DIR__ . '/../src/tools');
 import(__DIR__ . '/../src/vps/deploy.php');
+import(__DIR__ . '/../src/vps/init.php');
 
 import(__DIR__ . '/../src/check.php');
 import(__DIR__ . '/../src/composer.php');
