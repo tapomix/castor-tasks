@@ -5,6 +5,7 @@ namespace Tapomix\Castor\Tests\Unit\Vps;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+use function Tapomix\Castor\Vps\codeCheckedOut;
 use function Tapomix\Castor\Vps\detectFramework;
 use function Tapomix\Castor\Vps\dotenvProblems;
 use function Tapomix\Castor\Vps\envFromPath;
@@ -86,23 +87,50 @@ class InitTest extends TestCase
 
     public function testDotenvWithoutProblems(): void
     {
-        $this->assertSame([], dotenvProblems(['CONTAINER_NAME' => 'bank', 'APP_ENV' => 'prod', 'DB_PASS' => 'abc']));
+        $this->assertSame([], dotenvProblems(['CONTAINER_NAME' => 'bank', 'APP_ENV' => 'prod', 'TRAEFIK_HOST' => 'bank.example.com', 'DB_PASS' => 'abc']));
     }
 
     public function testDotenvProblems(): void
     {
         $this->assertSame(
-            ['CONTAINER_NAME is empty', 'APP_ENV is "dev", expected "prod"', 'DB_PASS is still the .env.dist default'],
-            dotenvProblems(['CONTAINER_NAME' => '', 'APP_ENV' => 'dev', 'DB_PASS' => 'ChangeMe!']),
+            ['CONTAINER_NAME is empty', 'APP_ENV is "dev", expected "prod"', 'TRAEFIK_HOST is "bank.domain.ext", expected <site>.<domain>', 'DB_PASS is still the .env.dist default'],
+            dotenvProblems(['CONTAINER_NAME' => '', 'APP_ENV' => 'dev', 'TRAEFIK_HOST' => 'bank.domain.ext', 'DB_PASS' => 'ChangeMe!']),
         );
     }
 
     public function testDotenvProblemsOnMissingValues(): void
     {
         $this->assertSame(
-            ['CONTAINER_NAME is empty', 'APP_ENV is not set', 'DB_PASS is still the .env.dist default'],
+            ['CONTAINER_NAME is empty', 'APP_ENV is not set', 'TRAEFIK_HOST is not set', 'DB_PASS is still the .env.dist default'],
             dotenvProblems([]),
         );
+    }
+
+    public function testTraefikHostWithoutDomainIsAProblem(): void
+    {
+        // a site one level below the root: TRAEFIK_HOST=${CONTAINER_NAME}. resolves to "bank."
+        $this->assertSame(
+            ['TRAEFIK_HOST is "bank.", expected <site>.<domain>'],
+            dotenvProblems(['CONTAINER_NAME' => 'bank', 'APP_ENV' => 'prod', 'TRAEFIK_HOST' => 'bank.', 'DB_PASS' => 'abc']),
+        );
+    }
+
+    public function testCodeNotCheckedOutWhenMissing(): void
+    {
+        $this->assertFalse(codeCheckedOut(sys_get_temp_dir() . '/init-test-absent-' . uniqid()));
+    }
+
+    public function testCodeNotCheckedOutWhenEmpty(): void
+    {
+        // an uninitialized submodule: git leaves an empty directory
+        $this->assertFalse(codeCheckedOut($this->tempDir()));
+    }
+
+    public function testCodeCheckedOut(): void
+    {
+        touch($this->tempDir() . '/artisan');
+
+        $this->assertTrue(codeCheckedOut($this->dir));
     }
 
     public function testHasAppSecret(): void

@@ -60,20 +60,30 @@ function init(): int
 
     $problems = [...$problems, ...$envProblems];
 
-    // 2. the castor .env, framework detected from the code
+    // 2. the code, then the castor .env with the framework detected from it
     $castorEnvPath = $root . '/' . TAPOMIX_CASTOR_ENV_FILE;
-    if (!\is_file($castorEnvPath)) {
-        $dist = readDist($castorEnvPath . '.dist');
-        $codeDir = $root . '/' . ((new Dotenv()->parse($dist)['APP_CODE_PATH'] ?? '') ?: 'code');
-        $framework = detectFramework($codeDir);
-        \file_put_contents($castorEnvPath, prefillDotenv($dist, ['APP_FRAMEWORK' => $framework]));
-        $rows[] = ['.castor/.env.castor', \sprintf('created: APP_FRAMEWORK=%s (detected)', $framework)];
-    } else {
-        $rows[] = ['.castor/.env.castor', '✔'];
+    $castorEnvExists = \is_file($castorEnvPath);
+    $castorSource = $castorEnvExists ? (string) \file_get_contents($castorEnvPath) : readDist($castorEnvPath . '.dist');
+    $codePath = ((new Dotenv()->parse($castorSource)['APP_CODE_PATH'] ?? '') ?: 'code');
+    $codeReady = codeCheckedOut($root . '/' . $codePath);
+
+    if (!$codeReady) {
+        // an uninitialized submodule leaves an empty directory: nothing to detect, nothing to write in it
+        $rows[] = [$codePath . '/', '✘ not checked out: git submodule update --init'];
+        $problems[] = $codePath . '/ not checked out';
     }
 
-    $castorEnv = parseDotenv($castorEnvPath);
-    $codePath = ($castorEnv['APP_CODE_PATH'] ?? '') ?: 'code';
+    if ($castorEnvExists) {
+        $rows[] = ['.castor/.env.castor', '✔'];
+    } elseif ($codeReady) {
+        $framework = detectFramework($root . '/' . $codePath);
+        \file_put_contents($castorEnvPath, prefillDotenv($castorSource, ['APP_FRAMEWORK' => $framework]));
+        $rows[] = ['.castor/.env.castor', \sprintf('created: APP_FRAMEWORK=%s (detected)', $framework)];
+    } else {
+        $rows[] = ['.castor/.env.castor', '✘ waits for ' . $codePath . '/: the framework is detected from it'];
+    }
+
+    $castorEnv = \is_file($castorEnvPath) ? parseDotenv($castorEnvPath) : [];
 
     // 3. the local files git does not carry
     $overridePath = $root . '/compose.override.yaml';
@@ -87,13 +97,10 @@ function init(): int
     $rows[] = ['.docker/.composer-auth.json', $authExisted ? '✔' : 'created ({})'];
 
     // 4. the Symfony secret: the code env file, distinct from the infra .env
-    if ('symfony' === ($castorEnv['APP_FRAMEWORK'] ?? '')) {
+    if ($codeReady && 'symfony' === ($castorEnv['APP_FRAMEWORK'] ?? '')) {
         $prodLocalPath = $root . '/' . $codePath . '/.env.prod.local';
         $prodLocal = $codePath . '/.env.prod.local';
-        if (!\is_dir(\dirname($prodLocalPath))) {
-            $rows[] = [$prodLocal, '✘ ' . $codePath . '/ missing: git submodule update --init'];
-            $problems[] = $codePath . '/ missing';
-        } elseif (!\is_file($prodLocalPath)) {
+        if (!\is_file($prodLocalPath)) {
             writeSecretFile($prodLocalPath, 'APP_SECRET=' . generateToken() . "\n");
             $rows[] = [$prodLocal, 'created: APP_SECRET generated — add the project prod values by hand'];
         } elseif (!hasAppSecret((string) \file_get_contents($prodLocalPath))) {
@@ -200,6 +207,12 @@ function envFromPath(string $projectDir): array
     ];
 }
 
+/** The code is there: an uninitialized submodule leaves its directory empty. */
+function codeCheckedOut(string $codeDir): bool
+{
+    return \is_dir($codeDir) && [] !== \array_diff((array) \scandir($codeDir), ['.', '..']);
+}
+
 function detectFramework(string $codeDir): string
 {
     return match (true) {
@@ -229,6 +242,14 @@ function dotenvProblems(array $env): array
         $problems[] = 'APP_ENV is not set';
     } elseif ('prod' !== $appEnv) {
         $problems[] = \sprintf('APP_ENV is "%s", expected "prod"', $appEnv);
+    }
+
+    // the parsed value: TRAEFIK_HOST=${CONTAINER_NAME}.<domain>, the domain missing or still the .env.dist placeholder
+    $host = $env['TRAEFIK_HOST'] ?? '';
+    if ('' === $host) {
+        $problems[] = 'TRAEFIK_HOST is not set';
+    } elseif (\str_ends_with($host, '.') || \str_contains($host, 'domain.ext')) {
+        $problems[] = \sprintf('TRAEFIK_HOST is "%s", expected <site>.<domain>', $host);
     }
 
     if (\in_array($env['DB_PASS'] ?? '', ['', 'ChangeMe!'], true)) {
