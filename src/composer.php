@@ -8,6 +8,7 @@ use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 use Castor\Exception\ProblemException;
 
+use function Castor\context;
 use function Castor\variable;
 use function Tapomix\Castor\Docker\exec as docker_exec;
 
@@ -47,4 +48,23 @@ function execGlobal(
     }
 
     exec(['global', ...$args]);
+}
+
+/** Major.minor PHP version running in the given service (e.g. `8.5`) */
+function getContainerPhpVersion(string $service): string
+{
+    // no TTY: a TTY process streams its output to the terminal and leaves nothing to read
+    $process = docker_exec(
+        $service,
+        ['php', '-r', 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;'],
+        context()->withTty(false)->withQuiet(),
+    );
+
+    $version = \trim($process->getOutput());
+
+    if (1 !== \preg_match('/^\d+\.\d+$/', $version)) {
+        throw new ProblemException(\sprintf('Unable to read the PHP version of the "%s" service.', $service));
+    }
+
+    return $version;
 }

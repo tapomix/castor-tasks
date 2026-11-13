@@ -49,6 +49,7 @@ function deploy(): void
     docker_pull(); // non-buildable images only: build() pulls the base images itself
 
     io()->section('Building images');
+    ensureComposerAuthFile(PathHelper::getRoot());
     docker_build();
 
     io()->section('Restarting containers');
@@ -71,4 +72,19 @@ function runMigrations(): void
         'laravel' => artisan(['migrate', '--force']),
         default => io()->text(\sprintf('No migration step for framework "%s", skipping.', $framework)),
     };
+}
+
+/**
+ * Create the Composer auth file when absent: a build secret of compose.prod.yaml, `{}` without private repository.
+ *
+ * Only a build needs it (`ps`, `logs`, `down` pass without it), and every prod build goes through vps:deploy.
+ * Plain is_file(): usable without a booted castor container.
+ */
+function ensureComposerAuthFile(string $root): void
+{
+    $path = $root . '/.docker/.composer-auth.json';
+
+    if (!\is_file($path)) {
+        \file_put_contents($path, '{}');
+    }
 }

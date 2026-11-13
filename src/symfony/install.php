@@ -13,8 +13,8 @@ use function Castor\io;
 use function Castor\variable;
 use function Tapomix\Castor\Composer\exec as composer_exec;
 use function Tapomix\Castor\Composer\execDev as composer_dev;
+use function Tapomix\Castor\Composer\getContainerPhpVersion;
 use function Tapomix\Castor\Docker\exec as docker_exec;
-use function Tapomix\Castor\Docker\getContainerPhpVersion;
 
 define('TAPOMIX_NAMESPACE_SYMFONY', 'tapomix-symfony');
 

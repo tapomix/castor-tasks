@@ -109,15 +109,6 @@ function buildBaseDockerComposeCmd(): array
         throw new ProblemException('Docker Compose config not found');
     }
 
-    // ! prod ! ensure the file always exist to use as secret
-    $composerAuthFile = $root . '/.docker/.composer-auth.json';
-    if (
-        'prod' === $appEnvironment
-        && !fs()->exists($composerAuthFile)
-    ) {
-        fs()->dumpFile($composerAuthFile, '{}');
-    }
-
     // always use base file + env specific + custom override if exists
     $composes = [
         'compose.yaml', // base
@@ -172,23 +163,4 @@ function exec(string $service, array $command, ?Context $context = null, array $
     }
 
     return castor_run([...buildBaseDockerComposeCmd(), 'exec', ...$envArgs, $service, ...$command], context: $context);
-}
-
-/** Major.minor PHP version running in the given service (e.g. `8.5`) */
-function getContainerPhpVersion(string $service): string
-{
-    // no TTY: a TTY process streams its output to the terminal and leaves nothing to read
-    $process = exec(
-        $service,
-        ['php', '-r', 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;'],
-        context()->withTty(false)->withQuiet(),
-    );
-
-    $version = \trim($process->getOutput());
-
-    if (1 !== \preg_match('/^\d+\.\d+$/', $version)) {
-        throw new ProblemException(\sprintf('Unable to read the PHP version of the "%s" service.', $service));
-    }
-
-    return $version;
 }
