@@ -45,6 +45,37 @@ The browser runs in the background and is detached from the process.
 
 ---
 
+### `dev` - Start and Open the Application
+
+Start all services, then open the application in the browser: `castor start -u && castor open` in one command.
+
+**Aliases:** `tapomix-tools:dev`, `dev`
+
+**Usage:**
+
+```bash
+# Pull and build the images, start, open the browser
+castor dev
+
+# Skip the pull and the build
+castor dev --no-update
+
+# Use specific browser
+castor dev --browser=chromium
+```
+
+**Options:**
+
+- `-u, --update` / `--no-update` - Pull and build the images first (default: enabled)
+- `--browser=<executable>` - Browser executable to use (default: from `CASTOR_DEFAULT_BROWSER`)
+
+**How it works:**
+
+Runs `start` (with `--update` unless `--no-update`), then `browser`. A failing start stops the task: the browser never
+opens on a stack that did not come up.
+
+---
+
 ### `password` - Generate Secure Password
 
 Generate a cryptographically secure random password.

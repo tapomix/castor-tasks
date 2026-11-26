@@ -336,6 +336,7 @@ Development utilities.
 
 ```bash
 castor browser
+castor dev
 castor password
 castor token
 ```
