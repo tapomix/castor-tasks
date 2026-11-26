@@ -3,12 +3,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.6.3] - 2026-11-26
 
 ### Added
 
-- `dev` to start all services and open the application in the browser (`start -u` then `open`, `--no-update` skips
-  the pull and the build)
+- `dev` to run `start -u` then `open` (`--no-update` to skip the pull and build)
 
 ---
 
